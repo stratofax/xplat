@@ -1,11 +1,13 @@
 [tool.poetry]
 name = "xplat"
 version = "0.1.0"
-description = ""
+description = "Cross-platform tools for file and image conversion"
 authors = ["Neil Johnson <neil@cadent.com>"]
 
 [tool.poetry.dependencies]
 python = "^3.9"
+Pillow = "8.2.0"
+optimize-images = "^1.5.0"
 
 [tool.poetry.dev-dependencies]
 pytest = "^5.2"
