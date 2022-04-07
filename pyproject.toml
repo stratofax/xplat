@@ -8,6 +8,7 @@ authors = ["Neil Johnson <neil@cadent.com>"]
 python = "^3.9"
 Pillow = "8.2.0"
 optimize-images = "^1.5.0"
+typer = "^0.4.1"
 
 [tool.poetry.dev-dependencies]
 pytest = "^5.2"
