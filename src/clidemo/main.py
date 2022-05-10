@@ -10,9 +10,9 @@ def main(name: str, lastname: str = "", formal: bool = False):
     If --formal is used, say hi very formally.
     """
     if formal:
-        typer.echo(f"Good day, kind {name} {lastname}.")
+        typer.secho(f"Good day, kind {name} {lastname}.", fg=typer.colors.BRIGHT_YELLOW)
     else:
-        typer.echo(f"Hello {name} {lastname}")
+        typer.secho(f"Hello {name} {lastname}", fg=typer.colors.BRIGHT_CYAN)
 
 
 if __name__ == "__main__":
