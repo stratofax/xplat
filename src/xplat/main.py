@@ -12,6 +12,16 @@ def version_callback(value: bool):
         raise typer.Exit()
 
 
+def check_dir(dir_path: Path, dir_label: str = "") -> bool:
+    if not dir_path.is_dir():
+        typer.secho(
+            f"{dir_label}{dir_path} is not a directory. Aborted!",
+            fg=typer.colors.WHITE,
+            bg=typer.colors.RED,
+        )
+    return dir_path.is_dir()
+
+
 app = typer.Typer(help="Cross-platform tools for batch file management and conversion")
 
 
@@ -20,16 +30,23 @@ def main(
     version: Optional[bool] = typer.Option(
         None, "--version", callback=version_callback, help="Print the version number."
     ),
+    source_dir: Path = typer.Option(
+        None,
+        help="Directory that contains the source files.",
+    ),
+    target_dir: Path = typer.Option(
+        None, help="Target directory to store processed files."
+    ),
 ):
     pass
 
 
 @app.command()
-def names(source_dir: Optional[Path] = typer.Option(None)):
+def names(dir_path: Optional[Path] = typer.Option(None)):
     """
     Convert file names for cross-platform compatibility
     """
-    if source_dir is None:
+    if dir_path is None:
         typer.echo("No source directory provided.")
         raise typer.Abort()
 
