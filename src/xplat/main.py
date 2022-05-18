@@ -1,9 +1,13 @@
 from pathlib import Path
+from re import L
 from typing import Optional
 
 import typer
 
 __version__ = "0.1.0"
+
+NO_SOURCE_DIR = -1
+NO_TARGET_DIR = -2
 
 
 def version_callback(value: bool):
@@ -38,17 +42,28 @@ def main(
         None, help="Target directory to store processed files."
     ),
 ):
+    if source_dir is not None and not check_dir(source_dir, "Source"):
+        raise typer.Exit(code=NO_SOURCE_DIR)
+    if target_dir is not None and not check_dir(target_dir, "Target"):
+        raise typer.Exit(code=NO_TARGET_DIR)
+
+
+@app.command()
+def list():
+    """List files in specified directories."""
     pass
 
 
 @app.command()
-def names(dir_path: Optional[Path] = typer.Option(None)):
-    """
-    Convert file names for cross-platform compatibility
-    """
-    if dir_path is None:
-        typer.echo("No source directory provided.")
-        raise typer.Abort()
+def names():
+    """Convert file names of the specified files."""
+    pass
+
+
+@app.command()
+def pdf():
+    """Convert PDF files to specified output format"""
+    pass
 
 
 if __name__ == "__main__":
