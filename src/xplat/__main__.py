@@ -20,7 +20,7 @@ def version_callback(value: bool):
 def check_dir(dir_path: Path, dir_label: str = "") -> bool:
     if not dir_path.is_dir():
         typer.secho(
-            f"{dir_label}{dir_path} is not a directory. Aborted!",
+            f"{dir_label}:{dir_path} is not a directory. Aborted!",
             fg=typer.colors.WHITE,
             bg=typer.colors.RED,
         )
@@ -33,15 +33,13 @@ def create_file_list(dir: Path, file_type: str = "*.*") -> list:
 
 
 def print_files(files: list):
-    typer.echo(f"{files}")
-    if not files:
-        typer.secho("No files found.", fg=typer.colors.BRIGHT_YELLOW)
+    # testing for the empty list works reliably
+    if files == []:
+        return 0
     else:
         for file_count, file_name in enumerate(files, start=1):
             typer.secho(Path(file_name).name, fg=typer.colors.GREEN)
-    # report the number of files found.
-    plural = "s" if file_count > 1 else ""
-    typer.echo(f"Total file{plural} found: {file_count}")
+        return file_count
 
 
 app = typer.Typer(help="Cross-platform tools for batch file management and conversion")
@@ -52,18 +50,8 @@ def main(
     version: Optional[bool] = typer.Option(
         None, "--version", callback=version_callback, help="Print the version number."
     ),
-    source_dir: Path = typer.Option(
-        None,
-        help="Directory that contains the source files.",
-    ),
-    target_dir: Path = typer.Option(
-        None, help="Target directory to store processed files."
-    ),
 ):
-    if source_dir is not None and not check_dir(source_dir, "Source"):
-        raise typer.Exit(code=NO_SOURCE_DIR)
-    if target_dir is not None and not check_dir(target_dir, "Target"):
-        raise typer.Exit(code=NO_TARGET_DIR)
+    pass
 
 
 @app.command()
@@ -78,15 +66,32 @@ def list(
 ):
     """List files in the specified directory."""
     globber = f"*.{ext}" if ext is not None else "*.*"
-    if check_dir(dir):
+    if check_dir(dir, "Listing"):
         file_list = create_file_list(dir, globber)
-        print_files(file_list)
+        f_count = print_files(file_list)
+        # report the number of files found.
+        plural = "s" if f_count != 1 else ""
+        typer.secho(
+            f"Total file{plural} found matching filter '{globber}' = {f_count}",
+            fg=typer.colors.BRIGHT_YELLOW,
+        )
 
 
 @app.command()
-def names():
+def names(
+    source_dir: Path = typer.Option(
+        ...,
+        help="Source irectory containing the files to rename.",
+    ),
+    target_dir: Path = typer.Option(
+        None, help="Target directory to save renamed files."
+    ),
+):
     """Convert file names of the specified files."""
-    pass
+    if source_dir is not None and not check_dir(source_dir, "Source"):
+        raise typer.Exit(code=NO_SOURCE_DIR)
+    if target_dir is not None and not check_dir(target_dir, "Target"):
+        raise typer.Exit(code=NO_TARGET_DIR)
 
 
 @app.command()
