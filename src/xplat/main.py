@@ -49,6 +49,12 @@ def main(
 
 
 @app.command()
+def info():
+    """Display platform information."""
+    pass
+
+
+@app.command()
 def list():
     """List files in specified directories."""
     pass
