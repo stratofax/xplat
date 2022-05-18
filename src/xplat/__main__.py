@@ -27,6 +27,23 @@ def check_dir(dir_path: Path, dir_label: str = "") -> bool:
     return dir_path.is_dir()
 
 
+def create_file_list(dir: Path, file_type: str = "*.*") -> list:
+    # returns a list of Path objects
+    return sorted(dir.glob(file_type))
+
+
+def print_files(files: list):
+    typer.echo(f"{files}")
+    if not files:
+        typer.secho("No files found.", fg=typer.colors.BRIGHT_YELLOW)
+    else:
+        for file_count, file_name in enumerate(files, start=1):
+            typer.secho(Path(file_name).name, fg=typer.colors.GREEN)
+    # report the number of files found.
+    plural = "s" if file_count > 1 else ""
+    typer.echo(f"Total file{plural} found: {file_count}")
+
+
 app = typer.Typer(help="Cross-platform tools for batch file management and conversion")
 
 
@@ -56,9 +73,14 @@ def info():
 
 
 @app.command()
-def list():
-    """List files in specified directories."""
-    pass
+def list(
+    dir: Path, ext: str = typer.Option(None, help="Case-sensitive file extension.")
+):
+    """List files in the specified directory."""
+    globber = f"*.{ext}" if ext is not None else "*.*"
+    if check_dir(dir):
+        file_list = create_file_list(dir, globber)
+        print_files(file_list)
 
 
 @app.command()
