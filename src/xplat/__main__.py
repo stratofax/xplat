@@ -1,8 +1,9 @@
 from pathlib import Path
-from re import L
 from typing import Optional
 
 import typer
+
+from xplat.info import plat
 
 __version__ = "0.1.0"
 
@@ -51,7 +52,7 @@ def main(
 @app.command()
 def info():
     """Display platform information."""
-    pass
+    typer.echo(plat.create_platform_report())
 
 
 @app.command()
