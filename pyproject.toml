@@ -6,7 +6,6 @@ authors = ["Neil Johnson <neil@cadent.com>"]
 
 [tool.poetry.dependencies]
 python = "^3.9"
-Pillow = "8.2.0"
 optimize-images = "^1.5.0"
 typer = "^0.4.1"
 colorama = "^0.4.4"
