@@ -4,9 +4,9 @@ from click import secho
 
 import typer
 
-from xplat import __version__, info, names
-
-# __version__ = "0.1.0"
+from xplat import __version__
+from xplat import plat_info
+from xplat import renamer
 
 NO_SOURCE_DIR = -10
 NO_OUTPUT_DIR = -20
@@ -16,7 +16,7 @@ USER_CANCEL = 10
 
 def version_callback(value: bool):
     if value:
-        typer.echo(f"xplat CLI Version: {__version__}")
+        typer.echo(f"xplat version: {__version__.__version__}")
         raise typer.Exit()
 
 
@@ -55,15 +55,12 @@ def print_files(files: list):
     return file_count
 
 
-def rename_list(
-    f_list: list,
-    output_dir: Path = None,
-):
+def rename_list(f_list: list, output_dir: Path = None, dryrun: bool = False):
     for convert_count, f_name in enumerate(f_list, start=1):
         typer.echo("Converting file name:")
         typer.secho(f"{f_name}", fg=typer.colors.CYAN)
         typer.echo("  to:")
-        new_file_name = names.inet_names(f_name, output_dir, dryrun=False)
+        new_file_name = renamer.inet_names(f_name, output_dir, dryrun)
         typer.secho(f"{new_file_name}", fg=typer.colors.BRIGHT_CYAN)
     return convert_count
 
@@ -83,7 +80,7 @@ def main(
 @app.command()
 def info():
     """Display platform information."""
-    typer.echo(info.create_platform_report())
+    typer.echo(plat_info.create_platform_report())
 
 
 @app.command()
@@ -105,6 +102,9 @@ def names(
         None, help="Output directory to save renamed files."
     ),
     ext: str = typer.Option(None, help="Case-sensitive file extension."),
+    dry_run: bool = typer.Option(
+        False, help="Only display (don't save) proposed name changes"
+    ),
 ):
     """Convert names of multiple files for internet compatibility."""
     # use Typer to ensure we get a source directory
@@ -145,7 +145,7 @@ def names(
         typer.echo("Conversion cancelled.")
         raise typer.Exit(code=USER_CANCEL)
     else:
-        rename_total = rename_list(file_list, output_dir)
+        rename_total = rename_list(file_list, output_dir, dryrun=dry_run)
         plural = "s" if rename_total > 1 else ""
         typer.echo(f"Processed {rename_total} file{plural} of {files_found} found.")
 

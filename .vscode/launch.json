@@ -12,10 +12,14 @@
             "console": "integratedTerminal",
             "justMyCode": true,
             "args": [
-                "list",
+                "names",
+                "--source-dir"
                 "~/Downloads/",
+                "--output-dir",
+                "~/temp/",
                 "--ext",
-                "PDF"
+                "pdf",
+                "--dry-run",
             ]
         }
     ]
