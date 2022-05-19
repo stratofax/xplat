@@ -1,16 +1,17 @@
 from pathlib import Path
 from typing import Optional
-from click import secho
 
 import typer
 
 from xplat import __version__
 from xplat import plat_info
 from xplat import renamer
+from xplat import pdf2img
 
 NO_SOURCE_DIR = -10
 NO_OUTPUT_DIR = -20
 NO_FILE_MATCH = -30
+BAD_FORMAT = -40
 USER_CANCEL = 10
 
 
@@ -30,6 +31,10 @@ def check_dir(dir_path: Path, dir_label: str = "") -> bool:
             bg=typer.colors.RED,
         )
     return dir_path.is_dir()
+
+
+def check_formats(file_ext: str, format_tuple: tuple) -> bool:
+    return file_ext in format_tuple
 
 
 def create_file_list(dir: Path, file_glob: str = None) -> list:
@@ -55,13 +60,48 @@ def print_files(files: list):
     return file_count
 
 
-def rename_list(f_list: list, output_dir: Path = None, dryrun: bool = False):
+def rename_list(f_list: list, output_dir: Path = None, dryrun: bool = False) -> int:
+    """Rename a list of file paths to internet-friendly names, display results"""
+    if dryrun:
+        typer.secho(
+            "Dry run is active, proposed changes won't be saved.",
+            fg=typer.colors.BRIGHT_WHITE,
+        )
+        start_label = "Proposing file name change from:"
+    else:
+        start_label = "Converting file name:"
     for convert_count, f_name in enumerate(f_list, start=1):
-        typer.echo("Converting file name:")
+        typer.echo(start_label)
         typer.secho(f"{f_name}", fg=typer.colors.CYAN)
         typer.echo("  to:")
         new_file_name = renamer.inet_names(f_name, output_dir, dryrun)
         typer.secho(f"{new_file_name}", fg=typer.colors.BRIGHT_CYAN)
+    return convert_count
+
+
+def convert_pdfs(
+    f_list: list,
+    output_dir: Path = None,
+    image_ext: str = "png",
+    img_width: int = 512,
+    gray: bool = False,
+) -> int:
+    for convert_count, f_name in enumerate(f_list, start=1):
+        typer.echo("Converting PDF file:")
+        typer.secho(f"{f_name}", fg=typer.colors.CYAN)
+        convert_results = pdf2img.pdf2img(
+            f_name,
+            output_dir,
+            format=image_ext,
+            width=img_width,
+            grayscale=gray,
+        )
+        typer.echo("  to:")
+        for result in convert_results:
+            typer.secho(f"{result}", fg=typer.colors.CYAN)
+
+        # new_file_name = renamer.inet_names(f_name, output_dir, dryrun)
+        # typer.secho(f"{new_file_name}", fg=typer.colors.BRIGHT_CYAN)
     return convert_count
 
 
@@ -156,13 +196,63 @@ def pdfs(
         ...,
         help="Source directory containing the PDF files to rename.",
     ),
-    output_dir: Path = typer.Option(None, help="Output directory to save image files."),
+    output_dir: Path = typer.Option(..., help="Output directory to save image files."),
     image_ext: str = typer.Option(
         None, help="Image file extension [jpeg, png, tiff or ppm]"
     ),
+    width: int = typer.Option(None, help="Image width in pixels, skip for max width"),
+    full_color: bool = typer.Option(True, help="Convert to color or grayscale"),
 ):
-    """Convert PDF files to image files (supports: JPEG, PNG, TIFF or PPM)."""
-    pass
+    """Convert PDF files to image files (formats: JPEG, PNG, TIFF or PPM)."""
+    # use Typer to ensure we get a source directory
+
+    if not check_dir(source_dir, "Source"):
+        raise typer.Exit(code=NO_SOURCE_DIR)
+    # output directory is optional
+    if not check_dir(output_dir, "Output"):
+        raise typer.Exit(code=NO_OUTPUT_DIR)
+
+    if image_ext is None:
+        typer.secho("No image format specified; using default: png")
+        convert_format = "png"
+    else:
+        convert_format = image_ext.lower()
+        formats = ("jpeg", "png", "tiff", "ppm")
+        if not check_formats(convert_format, formats):
+            typer.secho(
+                "Image format must be one of the following:",
+                fg=typer.colors.BRIGHT_YELLOW,
+            )
+            for ext in formats:
+                typer.echo(f"  {ext}")
+            raise typer.Exit(code=BAD_FORMAT)
+    grayscale = not full_color
+    typer.echo(f"Converting PDFs to '{convert_format}' format ...")
+    pdf_list = create_file_list(source_dir, "pdf")
+    files_found = print_files(pdf_list)
+    if files_found == 0:
+        typer.secho(
+            f"  No PDFs found in directory: {source_dir}",
+            fg=typer.colors.YELLOW,
+        )
+        raise typer.Exit(code=NO_FILE_MATCH)
+
+    typer.echo("Selected PDFs will be converted and saved to:")
+    typer.secho(f"{output_dir}", fg=typer.colors.YELLOW)
+    plural = "s" if files_found > 1 else ""
+    pdfs_2_img = typer.prompt(
+        f"Convert {files_found} PDF file{plural} to images of type '{convert_format}'? [y/N]",
+    )
+    # everything except y or Y cancels
+    if pdfs_2_img.lower() != "y":
+        typer.echo("PDF conversion cancelled.")
+        raise typer.Exit(code=USER_CANCEL)
+    else:
+        image_total = convert_pdfs(
+            pdf_list, output_dir, convert_format, img_width=width, gray=grayscale
+        )
+        plural = "s" if image_total > 1 else ""
+        typer.echo(f"Processed {image_total} file{plural} of {files_found} found.")
 
 
 if __name__ == "__main__":
