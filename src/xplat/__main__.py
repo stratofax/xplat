@@ -4,10 +4,9 @@ from click import secho
 
 import typer
 
-from xplat.info import plat
-from xplat.names import inet
+from xplat import __version__, info, names
 
-__version__ = "0.1.0"
+# __version__ = "0.1.0"
 
 NO_SOURCE_DIR = -10
 NO_OUTPUT_DIR = -20
@@ -64,7 +63,7 @@ def rename_list(
         typer.echo("Converting file name:")
         typer.secho(f"{f_name}", fg=typer.colors.CYAN)
         typer.echo("  to:")
-        new_file_name = inet.inet_names(f_name, output_dir, dryrun=False)
+        new_file_name = names.inet_names(f_name, output_dir, dryrun=False)
         typer.secho(f"{new_file_name}", fg=typer.colors.BRIGHT_CYAN)
     return convert_count
 
@@ -84,7 +83,7 @@ def main(
 @app.command()
 def info():
     """Display platform information."""
-    typer.echo(plat.create_platform_report())
+    typer.echo(info.create_platform_report())
 
 
 @app.command()
