@@ -3,16 +3,15 @@ Changes filename to avoid platform, path issues:
 * Spaces to delimiter
 * Dots to underscore
 * All lowercase
-* web-friendly
+* web and internet friendly
 
-Run standalone to convert all files in the current directory
 """
 
 from pathlib import Path
 
 
-def space_to_delim(
-    abs_path: str, target_dir="", delim="-", dots="_", dryrun=False
+def inet_names(
+    abs_path: Path, target_dir: Path = None, delim="-", dots="_", dryrun=False
 ) -> str:
     """
     if file exists,
@@ -22,7 +21,7 @@ def space_to_delim(
     """
     if not abs_path.is_file():
         return f"ERROR: {abs_path} is not a file."
-    if target_dir != "" and not Path(target_dir).is_dir():
+    if target_dir is not None and not target_dir.is_dir():
         return f"ERROR: {target_dir} is not a directory"
 
     file_path = Path(abs_path)
@@ -47,4 +46,4 @@ if __name__ == "__main__":
     test_path = Path.home()
     test_file = test_path / "Space to Delim.test.FILE.TMP"
     test_file.touch(exist_ok=True)
-    print(space_to_delim(test_file, delim="-", dryrun=True))
+    print(inet_names(test_file, delim="-", dryrun=True))
