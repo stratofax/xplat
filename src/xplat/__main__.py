@@ -152,8 +152,17 @@ def names(
 
 
 @app.command()
-def pdf():
-    """Convert PDF files to an image file (supports: PNG)."""
+def pdfs(
+    source_dir: Path = typer.Option(
+        ...,
+        help="Source directory containing the PDF files to rename.",
+    ),
+    output_dir: Path = typer.Option(None, help="Output directory to save image files."),
+    image_ext: str = typer.Option(
+        None, help="Image file extension [jpeg, png, tiff or ppm]"
+    ),
+):
+    """Convert PDF files to image files (supports: JPEG, PNG, TIFF or PPM)."""
     pass
 
 

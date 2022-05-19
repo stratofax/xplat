@@ -10,6 +10,7 @@ optimize-images = "^1.5.0"
 typer = "^0.4.1"
 colorama = "^0.4.4"
 shellingham = "^1.4.0"
+pdf2image = "^1.16.0"
 
 [tool.poetry.dev-dependencies]
 pytest = "^5.2"
