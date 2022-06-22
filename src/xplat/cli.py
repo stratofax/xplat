@@ -13,11 +13,12 @@ NO_OUTPUT_DIR = -20
 NO_FILE_MATCH = -30
 BAD_FORMAT = -40
 USER_CANCEL = 10
+VERSION = __version__.__version__
 
 
 def version_callback(value: bool):
     if value:
-        typer.echo(f"xplat version: {__version__.__version__}")
+        typer.echo(f"xplat version: {VERSION}")
         raise typer.Exit()
 
 

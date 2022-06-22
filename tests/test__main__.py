@@ -2,7 +2,7 @@
 
 from typer.testing import CliRunner
 from xplat import __version__
-from xplat.__main__ import app
+from xplat.cli import app
 
 runner = CliRunner()
 
