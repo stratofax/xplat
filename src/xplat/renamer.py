@@ -13,9 +13,9 @@ from pathlib import Path
 def inet_names(
     abs_path: Path,
     target_dir: Path = None,
-    delim_chr: str = "-",
-    dots="_",
-    dryrun=False,
+    delim_chr: str = "_",
+    dots: str = "_",
+    dryrun: bool = False,
 ) -> str:
     """
     if file exists,
