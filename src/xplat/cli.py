@@ -1,6 +1,7 @@
 from pathlib import Path
 from typing import Optional
 
+import subprocess
 import typer
 
 from xplat import __version__
@@ -104,6 +105,38 @@ def convert_pdfs(
         # new_file_name = renamer.inet_names(f_name, output_dir, dryrun)
         # typer.secho(f"{new_file_name}", fg=typer.colors.BRIGHT_CYAN)
     return convert_count
+
+
+def convert_text(
+    full_file_name: str, output_dir: str = None, convert_ext: str = "html"
+) -> str:
+    """
+    Convert text file to specified file type with pandoc
+    """
+    if not Path(full_file_name).is_file():
+        typer.echo(f"ERROR: {full_file_name} is not a file", err=True)
+        return None
+    # set file type for glob
+    file_stem = Path(full_file_name).stem
+    if output_dir is None:
+        working_dir = Path(full_file_name).parent
+    else:
+        working_dir = Path(output_dir)
+    output_name = f"{working_dir}/{file_stem}.{convert_ext}"
+    convert_cmd = [
+        "pandoc",
+        "--wrap=none",
+        full_file_name,
+        "-o" f"{output_name}",
+    ]
+    convert_result = subprocess.run(convert_cmd)
+    if convert_result.returncode == 0:
+        return output_name
+    typer.echo(
+        f"Error {convert_result.returncode} converting {full_file_name} to {convert_ext}",
+        err=True,
+    )
+    return None
 
 
 app = typer.Typer(help="Cross-platform tools for batch file management and conversion")
@@ -254,6 +287,63 @@ def pdfs(
         )
         plural = "s" if image_total > 1 else ""
         typer.echo(f"Processed {image_total} file{plural} of {files_found} found.")
+
+
+@app.command()
+def text(
+    source_dir: Path = typer.Option(
+        ...,
+        help="Source directory containing the text files to rename.",
+    ),
+    output_dir: Path = typer.Option(
+        None, help="Output directory to save converted text files."
+    ),
+    source_ext: str = typer.Option(
+        "docx", help="Extension of source text files to convert."
+    ),
+    convert_ext: str = typer.Option(
+        "markdown", help="Extension of converted text files."
+    ),
+):
+    """Convert text files to a different text format."""
+    # use Typer to ensure we get a source directory
+    if not check_dir(source_dir, "Source"):
+        raise typer.Exit(code=NO_SOURCE_DIR)
+    # output directory is optional
+    if output_dir is not None and not check_dir(output_dir, "Output"):
+        raise typer.Exit(code=NO_OUTPUT_DIR)
+
+    convert_from = source_ext.lower()
+    convert_to = convert_ext.lower()
+    typer.echo(f"Converting {convert_from} files to {convert_to} format ...")
+    text_list = create_file_list(source_dir, convert_from)
+    files_found = print_files(text_list)
+    if files_found == 0:
+        typer.secho(
+            f"  No {convert_from} files found in directory: {source_dir}",
+            fg=typer.colors.YELLOW,
+        )
+        raise typer.Exit(code=NO_FILE_MATCH)
+
+    typer.echo(
+        f"Selected {convert_from} files will be converted and saved as {convert_to}."
+    )
+    plural = "s" if files_found > 1 else ""
+    confirm_convert = typer.prompt(
+        f"Convert {files_found} '{convert_from}' file{plural} to file{plural} of type '{convert_to}'? [y/N]",
+    )
+    # everything except y or Y cancels
+    if confirm_convert.lower() != "y":
+        typer.echo("Text conversion cancelled.")
+        raise typer.Exit(code=USER_CANCEL)
+    else:
+        for text_total, file_name in enumerate(text_list, start=1):
+            typer.secho(f"Converting: {file_name} ...", fg=typer.colors.CYAN)
+            new_name = convert_text(file_name, output_dir, convert_ext=convert_to)
+            if new_name is not None:
+                typer.secho(f"to:         {new_name}", fg=typer.colors.CYAN)
+        plural = "s" if text_total > 1 else ""
+        typer.echo(f"Processed {text_total} file{plural} of {files_found} found.")
 
 
 if __name__ == "__main__":
