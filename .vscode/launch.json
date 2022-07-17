@@ -13,7 +13,7 @@
             "justMyCode": true,
             "args": [
                 "names",
-                "--source-dir"
+                "--source-dir",
                 "~/Downloads/",
                 "--output-dir",
                 "~/temp/",
