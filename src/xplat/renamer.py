@@ -28,7 +28,7 @@ def inet_names(
     if not abs_path.is_file():
         return f"ERROR: {abs_path} is not a file."
     if target_dir is not None and not target_dir.is_dir():
-        return f"ERROR: {target_dir} is not a directory"
+        return f"ERROR: {target_dir} is not a directory."
 
     # replace periods in file stem with dots delimiter
     new_stem = abs_path.stem.replace(".", dots).lower()
@@ -45,7 +45,3 @@ def inet_names(
     if not dry_run:
         abs_path.rename(new_path)
     return new_path
-
-
-if __name__ == "__main__":
-    print(inet_names(Path.home() / "not_a_file.txt", delim_chr="-", dryrun=True))
