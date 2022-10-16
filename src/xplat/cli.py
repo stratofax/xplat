@@ -1,13 +1,16 @@
+""" The Command Line Interface (CLI) code for xplat
+
+Uses the typer package to implement sub-commands, command options
+and help text.
+
+"""
+import subprocess
 from pathlib import Path
 from typing import Optional
 
-import subprocess
 import typer
 
-from xplat import __version__
-from xplat import plat_info
-from xplat import renamer
-from xplat import pdf2img
+from xplat import __version__, pdf2img, plat_info, renamer
 
 NO_SOURCE_DIR = -10
 NO_OUTPUT_DIR = -20
@@ -62,7 +65,9 @@ def print_files(files: list):
     return file_count
 
 
-def rename_list(f_list: list, output_dir: Path = None, dryrun: bool = False) -> int:
+def rename_list(
+    f_list: list, output_dir: Path = None, dryrun: bool = False
+) -> int:
     """Rename a list of file paths to internet-friendly names, display results"""
     if dryrun:
         typer.secho(
@@ -139,13 +144,18 @@ def convert_text(
     return None
 
 
-app = typer.Typer(help="Cross-platform tools for batch file management and conversion")
+app = typer.Typer(
+    help="Cross-platform tools for batch file management and conversion"
+)
 
 
 @app.callback()
 def main(
     version: Optional[bool] = typer.Option(
-        None, "--version", callback=version_callback, help="Print the version number."
+        None,
+        "--version",
+        callback=version_callback,
+        help="Print the version number.",
     ),
 ):
     pass
@@ -159,7 +169,8 @@ def info():
 
 @app.command()
 def list(
-    dir: Path, ext: str = typer.Option(None, help="Case-sensitive file extension.")
+    dir: Path,
+    ext: str = typer.Option(None, help="Case-sensitive file extension."),
 ):
     """List files in the specified directory."""
     if check_dir(dir, "Listing"):
@@ -221,7 +232,9 @@ def names(
     else:
         rename_total = rename_list(file_list, output_dir, dryrun=dry_run)
         plural = "s" if rename_total > 1 else ""
-        typer.echo(f"Processed {rename_total} file{plural} of {files_found} found.")
+        typer.echo(
+            f"Processed {rename_total} file{plural} of {files_found} found."
+        )
 
 
 @app.command()
@@ -230,12 +243,18 @@ def pdfs(
         ...,
         help="Source directory containing the PDF files to rename.",
     ),
-    output_dir: Path = typer.Option(..., help="Output directory to save image files."),
+    output_dir: Path = typer.Option(
+        ..., help="Output directory to save image files."
+    ),
     image_ext: str = typer.Option(
         None, help="Image file extension [jpeg, png, tiff or ppm]"
     ),
-    width: int = typer.Option(None, help="Image width in pixels, skip for max width"),
-    full_color: bool = typer.Option(True, help="Convert to color or grayscale"),
+    width: int = typer.Option(
+        None, help="Image width in pixels, skip for max width"
+    ),
+    full_color: bool = typer.Option(
+        True, help="Convert to color or grayscale"
+    ),
 ):
     """Convert PDF files to image files (formats: JPEG, PNG, TIFF or PPM)."""
     # use Typer to ensure we get a source directory
@@ -283,10 +302,16 @@ def pdfs(
         raise typer.Exit(code=USER_CANCEL)
     else:
         image_total = convert_pdfs(
-            pdf_list, output_dir, convert_format, img_width=width, gray=grayscale
+            pdf_list,
+            output_dir,
+            convert_format,
+            img_width=width,
+            gray=grayscale,
         )
         plural = "s" if image_total > 1 else ""
-        typer.echo(f"Processed {image_total} file{plural} of {files_found} found.")
+        typer.echo(
+            f"Processed {image_total} file{plural} of {files_found} found."
+        )
 
 
 @app.command()
@@ -339,11 +364,15 @@ def text(
     else:
         for text_total, file_name in enumerate(text_list, start=1):
             typer.secho(f"Converting: {file_name} ...", fg=typer.colors.CYAN)
-            new_name = convert_text(file_name, output_dir, convert_ext=convert_to)
+            new_name = convert_text(
+                file_name, output_dir, convert_ext=convert_to
+            )
             if new_name is not None:
                 typer.secho(f"to:         {new_name}", fg=typer.colors.CYAN)
         plural = "s" if text_total > 1 else ""
-        typer.echo(f"Processed {text_total} file{plural} of {files_found} found.")
+        typer.echo(
+            f"Processed {text_total} file{plural} of {files_found} found."
+        )
 
 
 if __name__ == "__main__":
