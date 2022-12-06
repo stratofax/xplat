@@ -158,6 +158,7 @@ def main(
         help="Print the version number.",
     ),
 ):
+    # Empty function required for callback
     pass
 
 
