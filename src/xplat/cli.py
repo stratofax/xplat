@@ -1,8 +1,6 @@
 """ The Command Line Interface (CLI) code for xplat
-
 Uses the typer package to implement sub-commands, command options
 and help text.
-
 """
 import subprocess
 from pathlib import Path
@@ -10,20 +8,21 @@ from typing import Optional
 
 import typer
 
-from xplat import __version__, pdf2img, plat_info, renamer
+from xplat import constants, pdf2img, plat_info, renamer
 
 NO_SOURCE_DIR = -10
 NO_OUTPUT_DIR = -20
 NO_FILE_MATCH = -30
 BAD_FORMAT = -40
 USER_CANCEL = 10
-VERSION = __version__.__version__
+VERSION = constants.VERSION
 
 
-def version_callback(value: bool):
+def version_callback(value: bool) -> None:
+    """Display the version number and exit."""
     if value:
         typer.echo(f"xplat version: {VERSION}")
-        raise typer.Exit()
+        raise typer.Exit
 
 
 def check_dir(dir_path: Path, dir_label: str = "") -> bool:
