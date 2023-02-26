@@ -6,6 +6,12 @@ from xplat.cli import app
 runner = CliRunner()
 
 
+def test_app():
+    result = runner.invoke(app)
+    assert result.exit_code == constants.MISSING_COMMAND
+    assert "Missing command." in result.stdout
+
+
 def test_version():
     result = runner.invoke(app, ["--version"])
     assert result.exit_code == constants.NO_ERRORS
