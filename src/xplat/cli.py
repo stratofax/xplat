@@ -10,8 +10,6 @@ import typer
 
 from xplat import constants, pdf2img, plat_info, renamer
 
-NO_SOURCE_DIR = -10
-NO_OUTPUT_DIR = -20
 NO_FILE_MATCH = -30
 BAD_FORMAT = -40
 USER_CANCEL = 10
@@ -26,11 +24,14 @@ def version_callback(value: bool) -> None:
 
 
 def check_dir(dir_path: Path, dir_label: str = "") -> bool:
+    """Check if a directory exists, display error message if not.
+    dir_label is an optional label to describe the purpose of the directory path.
+    """
     if dir_label != "":
         dir_label = f"{dir_label}: "
     if not dir_path.is_dir():
         typer.secho(
-            f"{dir_label}{dir_path} is not a directory. Aborted!",
+            f"{dir_label}'{dir_path}' is not a directory. Aborted!",
             fg=typer.colors.WHITE,
             bg=typer.colors.RED,
         )
@@ -38,16 +39,19 @@ def check_dir(dir_path: Path, dir_label: str = "") -> bool:
 
 
 def check_formats(file_ext: str, format_tuple: tuple) -> bool:
+    """Check if a file extension is in a tuple of valid formats."""
     return file_ext in format_tuple
 
 
 def create_file_list(dir: Path, file_glob: str = None) -> list:
+    """Create a list of files in a directory, return the sorted list."""
     globber = "*.*" if file_glob is None else f"*.{file_glob}"
     # returns a list of Path objects
     return sorted(dir.glob(globber))
 
 
-def print_files(files: list):
+def print_files(files: list) -> int:
+    """Print a list of files, return the number of files found."""
     # sourcery skip: remove-unnecessary-else, simplify-empty-collection-comparison, swap-if-else-branches
     # testing for the empty list works reliably, unlike boolean test
     if files == []:
@@ -58,8 +62,7 @@ def print_files(files: list):
 
     # report the number of files found.
     typer.secho(
-        f"Total files found = {file_count}",
-        fg=typer.colors.BRIGHT_YELLOW,
+        f"Total files found = {file_count}", fg=typer.colors.BRIGHT_YELLOW
     )
     return file_count
 
@@ -156,13 +159,13 @@ def main(
         callback=version_callback,
         help="Print the version number.",
     ),
-):
-    # Empty function required for callback
+) -> None:
+    """Empty function required for version callback"""
     pass
 
 
 @app.command()
-def info():
+def info() -> None:
     """Display platform information."""
     typer.echo(plat_info.create_platform_report())
 
@@ -171,10 +174,19 @@ def info():
 def list(
     dir: Path,
     ext: str = typer.Option(None, help="Case-sensitive file extension."),
-):
+) -> None:
     """List files in the specified directory."""
-    if check_dir(dir, "Listing"):
+    if check_dir(dir, "File list"):
+        if ext is not None:
+            # remove leading period if present
+            ext = ext.lstrip(".")
+            typer.secho(
+                f"Listing files with extension '.{ext}':",
+                fg=typer.colors.BRIGHT_YELLOW,
+            )
         print_files(create_file_list(dir, ext))
+    else:
+        raise typer.Exit(code=constants.NO_FILE)
 
 
 @app.command()
@@ -190,17 +202,17 @@ def names(
     dry_run: bool = typer.Option(
         False, help="Only display (don't save) proposed name changes"
     ),
-):
-    """Convert names of multiple files for internet compatibility."""
+) -> None:
+    """Convert file names for cross-platform compatibility."""
     # use Typer to ensure we get a source directory
     if not check_dir(source_dir, "Source"):
-        raise typer.Exit(code=NO_SOURCE_DIR)
+        raise typer.Exit(code=constants.NO_FILE)
     # output directory is optional
     if output_dir is not None and not check_dir(output_dir, "Output"):
-        raise typer.Exit(code=NO_OUTPUT_DIR)
+        raise typer.Exit(code=constants.NO_FILE)
 
-    file_list = create_file_list(source_dir, ext)
-    files_found = print_files(file_list)
+    files = create_file_list(source_dir, ext)
+    files_found = print_files(files)
     if files_found == 0:
         typer.secho(
             "  Try a different extension, or skip '--ext' for all files.",
@@ -230,7 +242,7 @@ def names(
         typer.echo("Conversion cancelled.")
         raise typer.Exit(code=USER_CANCEL)
     else:
-        rename_total = rename_list(file_list, output_dir, dryrun=dry_run)
+        rename_total = rename_list(files, output_dir, dryrun=dry_run)
         plural = "s" if rename_total > 1 else ""
         typer.echo(
             f"Processed {rename_total} file{plural} of {files_found} found."
@@ -260,10 +272,10 @@ def pdfs(
     # use Typer to ensure we get a source directory
 
     if not check_dir(source_dir, "Source"):
-        raise typer.Exit(code=NO_SOURCE_DIR)
+        raise typer.Exit(code=constants.NO_FILE)
     # output directory is optional
     if not check_dir(output_dir, "Output"):
-        raise typer.Exit(code=NO_OUTPUT_DIR)
+        raise typer.Exit(code=constants.NO_FILE)
 
     if image_ext is None:
         typer.secho("No image format specified; using default: png")
@@ -333,10 +345,10 @@ def text(
     """Convert text files to a different text format."""
     # use Typer to ensure we get a source directory
     if not check_dir(source_dir, "Source"):
-        raise typer.Exit(code=NO_SOURCE_DIR)
+        raise typer.Exit(code=constants.NO_FILE)
     # output directory is optional
     if output_dir is not None and not check_dir(output_dir, "Output"):
-        raise typer.Exit(code=NO_OUTPUT_DIR)
+        raise typer.Exit(code=constants.NO_FILE)
 
     convert_from = source_ext.lower()
     convert_to = convert_ext.lower()
