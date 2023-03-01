@@ -28,7 +28,8 @@ def safe_stem(orig_stem: str, delim: str = "_") -> str:
     Remove all other special characters
     Replace double delimiters with single
     """
-    new_stem = orig_stem.replace(" ", delim).replace(".", "_").lower()
+    new_stem = orig_stem.replace(" ", delim).lower()
+    new_stem = new_stem.replace(".", "_")
     # remove all special characters
     new_stem = "".join([c for c in new_stem if c.isalnum() or c == delim])
     # replace double delimiters with single
@@ -54,8 +55,10 @@ def safe_renamer(
     # may not be needed:
     if target_dir is not None and not target_dir.is_dir():
         raise NotADirectoryError(f"{target_dir} is not a directory.")
-    # replace periods in file stem with dots delimiter
-    new_stem = safe_stem(abs_path.stem, delim_chr)
+
+    # rename file stem
+    # new_stem = safe_stem(abs_path.stem, delim_chr)
+    new_stem = safe_stem(abs_path.stem)
     # merge the stem with the lowercase suffix
     new_suffix = abs_path.suffix.lower()
     new_filename = f"{new_stem}{new_suffix}"

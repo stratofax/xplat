@@ -8,7 +8,7 @@ from typing import Optional
 
 import typer
 
-from xplat import constants, files, pdf2img, plat_info, renamer
+from xplat import constants, list_files, pdf2img, plat_info, renamer
 
 NO_FILE_MATCH = -30
 BAD_FORMAT = -40
@@ -71,7 +71,7 @@ def rename_list(
         typer.echo(start_label)
         typer.secho(f"{f_name}", fg=typer.colors.CYAN)
         typer.echo("  to:")
-        new_file_name = renamer.inet_names(f_name, output_dir, dryrun)
+        new_file_name = renamer.safe_renamer(f_name, output_dir, dryrun)
         typer.secho(f"{new_file_name}", fg=typer.colors.BRIGHT_CYAN)
     return convert_count
 
@@ -172,7 +172,7 @@ def list(
                 f"Listing files with extension '.{ext}':",
                 fg=typer.colors.BRIGHT_YELLOW,
             )
-        print_files(files.create_file_list(dir, ext))
+        print_files(list_files.create_file_list(dir, ext))
     else:
         raise typer.Exit(code=constants.NO_FILE)
 
@@ -199,7 +199,7 @@ def names(
     if output_dir is not None and not check_dir(output_dir, "Output"):
         raise typer.Exit(code=constants.NO_FILE)
 
-    files = files.create_file_list(source_dir, ext)
+    files = list_files.create_file_list(source_dir, ext)
     files_found = print_files(files)
     if files_found == 0:
         typer.secho(
@@ -271,7 +271,7 @@ def pdfs(
     else:
         convert_format = image_ext.lower()
         formats = ("jpeg", "png", "tiff", "ppm")
-        if not files.check_ext(convert_format, formats):
+        if not list_files.check_ext(convert_format, formats):
             typer.secho(
                 "Image format must be one of the following:",
                 fg=typer.colors.BRIGHT_YELLOW,
@@ -281,7 +281,7 @@ def pdfs(
             raise typer.Exit(code=BAD_FORMAT)
     grayscale = not full_color
     typer.echo(f"Converting PDFs to '{convert_format}' format ...")
-    pdf_list = files.create_file_list(source_dir, "pdf")
+    pdf_list = list_files.create_file_list(source_dir, "pdf")
     files_found = print_files(pdf_list)
     if files_found == 0:
         typer.secho(
@@ -341,7 +341,7 @@ def text(
     convert_from = source_ext.lower()
     convert_to = convert_ext.lower()
     typer.echo(f"Converting {convert_from} files to {convert_to} format ...")
-    text_files = files.create_file_list(source_dir, convert_from)
+    text_files = list_files.create_file_list(source_dir, convert_from)
     files_found = print_files(text_files)
     if files_found == 0:
         typer.secho(
