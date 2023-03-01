@@ -8,7 +8,7 @@ from typing import Optional
 
 import typer
 
-from xplat import constants, pdf2img, plat_info, renamer
+from xplat import constants, files, pdf2img, plat_info, renamer
 
 NO_FILE_MATCH = -30
 BAD_FORMAT = -40
@@ -36,18 +36,6 @@ def check_dir(dir_path: Path, dir_label: str = "") -> bool:
             bg=typer.colors.RED,
         )
     return dir_path.is_dir()
-
-
-def check_formats(file_ext: str, format_tuple: tuple) -> bool:
-    """Check if a file extension is in a tuple of valid formats."""
-    return file_ext in format_tuple
-
-
-def create_file_list(dir: Path, file_glob: str = None) -> list:
-    """Create a list of files in a directory, return the sorted list."""
-    globber = "*.*" if file_glob is None else f"*.{file_glob}"
-    # returns a list of Path objects
-    return sorted(dir.glob(globber))
 
 
 def print_files(files: list) -> int:
@@ -184,7 +172,7 @@ def list(
                 f"Listing files with extension '.{ext}':",
                 fg=typer.colors.BRIGHT_YELLOW,
             )
-        print_files(create_file_list(dir, ext))
+        print_files(files.create_file_list(dir, ext))
     else:
         raise typer.Exit(code=constants.NO_FILE)
 
@@ -211,7 +199,7 @@ def names(
     if output_dir is not None and not check_dir(output_dir, "Output"):
         raise typer.Exit(code=constants.NO_FILE)
 
-    files = create_file_list(source_dir, ext)
+    files = files.create_file_list(source_dir, ext)
     files_found = print_files(files)
     if files_found == 0:
         typer.secho(
@@ -267,7 +255,7 @@ def pdfs(
     full_color: bool = typer.Option(
         True, help="Convert to color or grayscale"
     ),
-):
+) -> None:
     """Convert PDF files to image files (formats: JPEG, PNG, TIFF or PPM)."""
     # use Typer to ensure we get a source directory
 
@@ -283,7 +271,7 @@ def pdfs(
     else:
         convert_format = image_ext.lower()
         formats = ("jpeg", "png", "tiff", "ppm")
-        if not check_formats(convert_format, formats):
+        if not files.check_ext(convert_format, formats):
             typer.secho(
                 "Image format must be one of the following:",
                 fg=typer.colors.BRIGHT_YELLOW,
@@ -293,7 +281,7 @@ def pdfs(
             raise typer.Exit(code=BAD_FORMAT)
     grayscale = not full_color
     typer.echo(f"Converting PDFs to '{convert_format}' format ...")
-    pdf_list = create_file_list(source_dir, "pdf")
+    pdf_list = files.create_file_list(source_dir, "pdf")
     files_found = print_files(pdf_list)
     if files_found == 0:
         typer.secho(
@@ -341,7 +329,7 @@ def text(
     convert_ext: str = typer.Option(
         "markdown", help="Extension of converted text files."
     ),
-):
+) -> None:
     """Convert text files to a different text format."""
     # use Typer to ensure we get a source directory
     if not check_dir(source_dir, "Source"):
@@ -353,8 +341,8 @@ def text(
     convert_from = source_ext.lower()
     convert_to = convert_ext.lower()
     typer.echo(f"Converting {convert_from} files to {convert_to} format ...")
-    text_list = create_file_list(source_dir, convert_from)
-    files_found = print_files(text_list)
+    text_files = files.create_file_list(source_dir, convert_from)
+    files_found = print_files(text_files)
     if files_found == 0:
         typer.secho(
             f"  No {convert_from} files found in directory: {source_dir}",
@@ -374,7 +362,7 @@ def text(
         typer.echo("Text conversion cancelled.")
         raise typer.Exit(code=USER_CANCEL)
     else:
-        for text_total, file_name in enumerate(text_list, start=1):
+        for text_total, file_name in enumerate(text_files, start=1):
             typer.secho(f"Converting: {file_name} ...", fg=typer.colors.CYAN)
             new_name = convert_text(
                 file_name, output_dir, convert_ext=convert_to
