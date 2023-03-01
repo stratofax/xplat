@@ -51,6 +51,7 @@ def safe_renamer(
     """
     if not abs_path.is_file():
         raise FileNotFoundError(f"{abs_path} is not a file.")
+    # may not be needed:
     if target_dir is not None and not target_dir.is_dir():
         raise NotADirectoryError(f"{target_dir} is not a directory.")
     # replace periods in file stem with dots delimiter
@@ -65,5 +66,9 @@ def safe_renamer(
     else:
         new_path = abs_path.with_name(new_filename)
     if not dry_run:
-        abs_path.rename(new_path)
+        # check to see if file exists
+        if new_path.exists():
+            raise FileExistsError(f"{new_path} already exists.")
+        else:
+            abs_path.rename(new_path)
     return new_path

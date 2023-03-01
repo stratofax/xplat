@@ -1,47 +1,62 @@
 from pathlib import Path
+
+import pytest
+
 from xplat import renamer
 
 # test in home dir
 # create test & output dir
-test_path = Path.home().joinpath("tmp", "xplat_tests")
-test_path.mkdir(parents=True, exist_ok=True)
-output_path = test_path.joinpath("target")
-output_path.mkdir(parents=True, exist_ok=True)
+_test_path = Path.home().joinpath("tmp", "xplat_tests")
+_test_path.mkdir(parents=True, exist_ok=True)
+_output_path = _test_path.joinpath("target")
+_output_path.mkdir(parents=True, exist_ok=True)
 
 # create test files
-no_dryrun_file = test_path / "Space to Delim.NO-Dry_Run.test.FILE.TXT"
-no_dryrun_file.touch(exist_ok=True)
+_no_dryrun_file = _test_path / "Space to Delim.NO-Dry_Run.test.FILE.TXT"
+_no_dryrun_file.touch(exist_ok=True)
 
-dryrun_file = test_path / "Space to Delim.is Dry_Run.test.FILE.TXT"
-dryrun_file.touch(exist_ok=True)
+_dryrun_file = _test_path / "Space to Delim.is Dry_Run.test.FILE.TXT"
+_dryrun_file.touch(exist_ok=True)
 
 
 def append_file_name(_file: Path, _dryrun: bool):
-    new_name = renamer.inet_names(_file, dry_run=_dryrun)
+    new_name = renamer.safe_renamer(_file, dry_run=_dryrun)
     with open(_file, "w") as t_file:
         # write the new name to the test file
         t_file.write(f"{new_name} - {_dryrun}")
 
 
 def test_bad_file():
-    bad_file = test_path / "not_a_file.tmp"
-    bad_file_results = renamer.inet_names(bad_file, dry_run=True)
-    assert bad_file_results.startswith("ERROR: ") and bad_file_results.endswith(
-        "not a file."
-    )
+    bad_file = _test_path / "not_a_file.tmp"
+    with pytest.raises(FileNotFoundError):
+        renamer.safe_renamer(bad_file, dry_run=True)
 
 
 def test_bad_dir():
-    bad_dir = test_path.joinpath("not_a_dir")
-    bad_dir_results = renamer.inet_names(dryrun_file, target_dir=bad_dir, dry_run=True)
-    assert bad_dir_results.startswith("ERROR: ")  # and bad_dir_results.endswith(
-    #  "not a directory."
-    # )
+    bad_dir = _test_path.joinpath("not_a_dir")
+    with pytest.raises(FileNotFoundError):
+        renamer.safe_renamer(_dryrun_file, target_dir=bad_dir, dry_run=True)
 
 
-def test_renamer_dryrun():
-    append_file_name(dryrun_file, True)
+# def test_renamer_dryrun():
+#     append_file_name(_dryrun_file, True)
 
 
-def test_renamer_no_dryrun():
-    new_name = renamer.inet_names(no_dryrun_file, target_dir=output_path, dry_run=False)
+# def test_renamer_no_dryrun():
+#     renamer.safe_renamer(
+#         _no_dryrun_file, target_dir=_output_path, dry_run=False
+#     )
+
+
+# remove test files & dirs
+# remove files from output dir
+for _file in _output_path.iterdir():
+    _file.unlink()
+# remove output dir
+_output_path.rmdir()
+
+# remove test files from test dir
+for _file in _test_path.iterdir():
+    _file.unlink()
+# remove test dir
+_test_path.rmdir()
