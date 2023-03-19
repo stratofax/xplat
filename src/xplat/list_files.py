@@ -1,6 +1,19 @@
 """File handling functions."""
-
+from datetime import datetime
 from pathlib import Path
+
+
+def format_bytes(num_bytes: int) -> str:
+    """format a number of bytes into a human-readable string"""
+    for unit in ["B", "K", "MB", "GB", "TB"]:
+        if num_bytes < 1024.0:
+            return f"{num_bytes:,.1f} {unit}"
+        num_bytes /= 1024.0
+
+
+def format_timestamp(timestamp: float) -> str:
+    """Format a timestamp into a human-readable string"""
+    return datetime.fromtimestamp(timestamp).strftime("%B %d, %Y %I:%M:%S %p")
 
 
 def check_ext(file_ext: str, format_tuple: tuple) -> bool:

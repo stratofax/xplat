@@ -5,7 +5,7 @@ Only CLI code should be in this module, input and output for the user.
 TODO: add logging
 """
 import subprocess
-from datetime import datetime
+
 from pathlib import Path
 from typing import Optional
 
@@ -26,27 +26,20 @@ def version_callback(value: bool) -> None:
         raise typer.Exit
 
 
-def format_bytes(num_bytes: int) -> str:
-    """format a number of bytes into a human-readable string"""
-    for unit in ["B", "K", "MB", "GB", "TB"]:
-        if num_bytes < 1024.0:
-            return f"{num_bytes:,.1f} {unit}"
-        num_bytes /= 1024.0
-
-
-def format_timestamp(timestamp: float) -> str:
-    """Format a timestamp into a human-readable string"""
-    return datetime.fromtimestamp(timestamp).strftime("%B %d, %Y %I:%M:%S %p")
-
-
 def show_file_info(file_name: Path) -> None:
     """Display file information for a file."""
-    file_size = format_bytes(file_name.stat().st_size)
+    file_size = list_files.format_bytes(file_name.stat().st_size)
     typer.secho(f"{file_name}", fg=typer.colors.BRIGHT_GREEN)
     typer.echo(f"  Size: {file_size}")
-    typer.echo(f"  Modified: {format_timestamp(file_name.stat().st_mtime)}")
-    typer.echo(f"  Created:  {format_timestamp(file_name.stat().st_ctime)}")
-    typer.echo(f"  Accessed: {format_timestamp(file_name.stat().st_atime)}")
+    typer.echo(
+        f"  Modified: {list_files.format_timestamp(file_name.stat().st_mtime)}"
+    )
+    typer.echo(
+        f"  Created:  {list_files.format_timestamp(file_name.stat().st_ctime)}"
+    )
+    typer.echo(
+        f"  Accessed: {list_files.format_timestamp(file_name.stat().st_atime)}"
+    )
 
 
 def check_dir(dir_path: Path, dir_label: str = "") -> bool:
@@ -193,7 +186,7 @@ def list(
         None, "--ext", "-x", help="Case-sensitive file extension."
     ),
 ) -> None:
-    """List files in the specified directory, currennt directory if none specified."""
+    """List files in the specified or current directory."""
     if path is None:
         path = Path.cwd()
     if path.is_file():
