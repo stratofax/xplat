@@ -8,8 +8,10 @@ def check_ext(file_ext: str, format_tuple: tuple) -> bool:
     return file_ext in format_tuple
 
 
-def create_file_list(dir: Path, file_glob: str = None) -> list:
+def create_file_list(dir_path: Path, file_glob: str = None) -> list:
     """Create a list of files in a directory, return the sorted list."""
-    globber = "*.*" if file_glob is None else f"*.{file_glob}"
-    # returns a list of Path objects
-    return sorted(dir.glob(globber))
+    if file_glob is None:
+        return sorted(dir_path.glob("*.*"))
+    file_glob = file_glob.lstrip(".")
+    globber = f"*.{file_glob}"
+    return sorted(dir_path.glob(globber))

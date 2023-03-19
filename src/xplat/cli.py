@@ -1,8 +1,11 @@
 """ The Command Line Interface (CLI) code for xplat
 Uses the typer package to implement sub-commands, command options
 and help text.
+Only CLI code should be in this module, input and output for the user.
+TODO: add logging
 """
 import subprocess
+from datetime import datetime
 from pathlib import Path
 from typing import Optional
 
@@ -23,6 +26,29 @@ def version_callback(value: bool) -> None:
         raise typer.Exit
 
 
+def format_bytes(num_bytes: int) -> str:
+    """format a number of bytes into a human-readable string"""
+    for unit in ["B", "K", "MB", "GB", "TB"]:
+        if num_bytes < 1024.0:
+            return f"{num_bytes:,.1f} {unit}"
+        num_bytes /= 1024.0
+
+
+def format_timestamp(timestamp: float) -> str:
+    """Format a timestamp into a human-readable string"""
+    return datetime.fromtimestamp(timestamp).strftime("%B %d, %Y %I:%M:%S %p")
+
+
+def show_file_info(file_name: Path) -> None:
+    """Display file information for a file."""
+    file_size = format_bytes(file_name.stat().st_size)
+    typer.secho(f"{file_name}", fg=typer.colors.BRIGHT_GREEN)
+    typer.echo(f"  Size: {file_size}")
+    typer.echo(f"  Modified: {format_timestamp(file_name.stat().st_mtime)}")
+    typer.echo(f"  Created:  {format_timestamp(file_name.stat().st_ctime)}")
+    typer.echo(f"  Accessed: {format_timestamp(file_name.stat().st_atime)}")
+
+
 def check_dir(dir_path: Path, dir_label: str = "") -> bool:
     """Check if a directory exists, display error message if not.
     dir_label is an optional label to describe the purpose of the directory path.
@@ -31,8 +57,8 @@ def check_dir(dir_path: Path, dir_label: str = "") -> bool:
         dir_label = f"{dir_label}: "
     if not dir_path.is_dir():
         typer.secho(
-            f"{dir_label}'{dir_path}' is not a directory. Aborted!",
-            fg=typer.colors.WHITE,
+            f"{dir_label}'{dir_path}' is not a directory.",
+            fg=typer.colors.BRIGHT_WHITE,
             bg=typer.colors.RED,
         )
     return dir_path.is_dir()
@@ -83,6 +109,7 @@ def convert_pdfs(
     img_width: int = 512,
     gray: bool = False,
 ) -> int:
+    """Convert a list of PDF files to images, display results"""
     for convert_count, f_name in enumerate(f_list, start=1):
         typer.echo("Converting PDF file:")
         typer.secho(f"{f_name}", fg=typer.colors.CYAN)
@@ -97,8 +124,6 @@ def convert_pdfs(
         for result in convert_results:
             typer.secho(f"{result}", fg=typer.colors.CYAN)
 
-        # new_file_name = renamer.inet_names(f_name, output_dir, dryrun)
-        # typer.secho(f"{new_file_name}", fg=typer.colors.BRIGHT_CYAN)
     return convert_count
 
 
@@ -144,6 +169,7 @@ def main(
     version: Optional[bool] = typer.Option(
         None,
         "--version",
+        "-V",
         callback=version_callback,
         help="Print the version number.",
     ),
@@ -160,21 +186,29 @@ def info() -> None:
 
 @app.command()
 def list(
-    dir: Path,
-    ext: str = typer.Option(None, help="Case-sensitive file extension."),
+    path: Optional[Path] = typer.Argument(
+        None, help="Directory to list files from (current if none)."
+    ),
+    ext: str = typer.Option(
+        None, "--ext", "-x", help="Case-sensitive file extension."
+    ),
 ) -> None:
-    """List files in the specified directory."""
-    if check_dir(dir, "File list"):
+    """List files in the specified directory, currennt directory if none specified."""
+    if path is None:
+        path = Path.cwd()
+    if path.is_file():
+        """list file information"""
+        show_file_info(path)
+    else:
+        """list directory contents"""
+        if not check_dir(path, "File list"):
+            raise typer.Exit(code=constants.NO_FILE)
         if ext is not None:
-            # remove leading period if present
-            ext = ext.lstrip(".")
             typer.secho(
                 f"Listing files with extension '.{ext}':",
                 fg=typer.colors.BRIGHT_YELLOW,
             )
-        print_files(list_files.create_file_list(dir, ext))
-    else:
-        raise typer.Exit(code=constants.NO_FILE)
+        print_files(list_files.create_file_list(path, ext))
 
 
 @app.command()
@@ -281,8 +315,8 @@ def pdfs(
             raise typer.Exit(code=BAD_FORMAT)
     grayscale = not full_color
     typer.echo(f"Converting PDFs to '{convert_format}' format ...")
-    pdf_list = list_files.create_file_list(source_dir, "pdf")
-    files_found = print_files(pdf_list)
+    pdfs = list_files.create_file_list(source_dir, "pdf")
+    files_found = print_files(pdfs)
     if files_found == 0:
         typer.secho(
             f"  No PDFs found in directory: {source_dir}",
@@ -302,7 +336,7 @@ def pdfs(
         raise typer.Exit(code=USER_CANCEL)
     else:
         image_total = convert_pdfs(
-            pdf_list,
+            pdfs,
             output_dir,
             convert_format,
             img_width=width,

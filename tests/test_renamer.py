@@ -6,7 +6,7 @@ from xplat import renamer
 
 # test in home dir
 # create test & output dir
-_test_path = Path.home().joinpath("tmp", "xplat_tests")
+_test_path = Path.home().joinpath("tmp", "xplat_renamer_tests")
 _test_path.mkdir(parents=True, exist_ok=True)
 _output_path = _test_path.joinpath("target")
 _output_path.mkdir(parents=True, exist_ok=True)
