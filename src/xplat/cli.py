@@ -5,7 +5,6 @@ Only CLI code should be in this module, input and output for the user.
 TODO: add logging
 """
 import subprocess
-
 from pathlib import Path
 from typing import Optional
 
@@ -298,7 +297,7 @@ def pdfs(
     else:
         convert_format = image_ext.lower()
         formats = ("jpeg", "png", "tiff", "ppm")
-        if not list_files.check_ext(convert_format, formats):
+        if convert_format not in formats:
             typer.secho(
                 "Image format must be one of the following:",
                 fg=typer.colors.BRIGHT_YELLOW,
