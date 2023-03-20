@@ -30,11 +30,11 @@ def test_info():
 def test_list():
     test_path = Path.home().joinpath("tmp", "xplat_cli_tests")
     test_path.mkdir(parents=True, exist_ok=True)
-    # create a large file to test file size
+    # create a large file (20K) to test file size
     list_file_1 = test_path.joinpath("list_file_1.txt")
     list_file_1.touch(exist_ok=True)
     with open(list_file_1, "w") as f:
-        f.write("0123456789" * 2000)
+        f.write("0123456789" * 2048)
     list_file_2 = test_path.joinpath("list_file_2.txt")
     list_file_2.touch(exist_ok=True)
     list_file_3 = test_path.joinpath("list_file_3.txt")
@@ -57,7 +57,7 @@ def test_list():
     test_file = _runner.invoke(app, ["list", str(list_file_1)])
     assert test_file.exit_code == 0
     assert list_file_1.name in test_file.stdout
-    assert "Size: 19.5 K" in test_file.stdout
+    assert "Size: 20.0 K" in test_file.stdout
     # remove test files from test dir
     for file in test_path.iterdir():
         file.unlink()
