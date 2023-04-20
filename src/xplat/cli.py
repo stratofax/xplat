@@ -15,13 +15,15 @@ from xplat import constants, list_files, pdf2img, plat_info, renamer
 NO_FILE_MATCH = -30
 BAD_FORMAT = -40
 USER_CANCEL = 10
+PROGRAM_NAME = constants.PROGRAM_NAME
 VERSION = constants.VERSION
+APP_HELP = constants.APP_HELP
 
 
 def version_callback(value: bool) -> None:
     """Display the version number and exit."""
     if value:
-        typer.echo(f"xplat version: {VERSION}")
+        typer.echo(f"{PROGRAM_NAME} version: {VERSION}")
         raise typer.Exit
 
 
@@ -76,7 +78,8 @@ def print_files(files: list) -> int:
 def rename_list(
     f_list: list, output_dir: Path = None, dryrun: bool = False
 ) -> int:
-    """Rename a list of file paths to internet-friendly names, display results"""
+    """
+    Rename a list of file paths to internet-friendly names, display results"""
     if dryrun:
         typer.secho(
             "Dry run is active, proposed changes won't be saved.",
@@ -152,7 +155,7 @@ def convert_text(
 
 
 app = typer.Typer(
-    help="Cross-platform tools for batch file management and conversion"
+    help=APP_HELP
 )
 
 
