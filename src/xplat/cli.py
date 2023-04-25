@@ -10,7 +10,7 @@ from typing import Optional
 
 import typer
 
-from xplat import constants, list_files, pdf2img, plat_info, renamer
+from xplat import constants, list_files, pdf_to_img, plat_info, renamer
 
 PROGRAM_NAME = constants.PROGRAM_NAME
 VERSION = constants.VERSION
@@ -44,8 +44,10 @@ def show_file_info(file_name: Path) -> None:
 
 
 def check_dir(dir_path: Path, dir_label: str = "") -> bool:
-    """Check if a directory exists, display error message if not.
-    dir_label is an optional label to describe the purpose of the directory path.
+    """
+    Check if a directory exists, display error message if not.
+    dir_label is an optional label to describe
+    the purpose of the directory path.
     """
     if dir_label != "":
         dir_label = f"{dir_label}: "
@@ -108,7 +110,7 @@ def convert_pdfs(
     for convert_count, f_name in enumerate(f_list, start=1):
         typer.echo("Converting PDF file:")
         typer.secho(f"{f_name}", fg=typer.colors.CYAN)
-        convert_results = pdf2img.pdf2img(
+        convert_results = pdf_to_img.pdf_to_img(
             f_name,
             output_dir,
             format=image_ext,
@@ -154,9 +156,7 @@ def convert_text(
     return None
 
 
-app = typer.Typer(
-    help=APP_HELP
-)
+app = typer.Typer(help=APP_HELP)
 
 
 @app.callback()
