@@ -9,6 +9,7 @@ APP_HELP = "Cross-platform tools for batch file management and conversion"
 VERSION = "0.1.1"
 
 NO_ERROR = 0
+MISSING_COMMAND = 2  # defined by typer
 NO_FILE = errno.ENOENT  # no such file or directory
 NO_DATA = errno.ENODATA  # no data available
-BAD_REQUEST = errno.EBADRQC
+BAD_REQUEST = errno.EBADMSG  # not a data message
