@@ -69,12 +69,18 @@ def create_platform_report() -> str:
         platform_rpt += add_header("Linux")
         # libc_ver is a 2-element tuple
         libc_info = platform.libc_ver()
-        platform_rpt += add_row("libc Library", libc_info[0], tab_stop=WIDE_COLUMN)
-        platform_rpt += add_row("libc Version", libc_info[1], tab_stop=WIDE_COLUMN)
+        platform_rpt += add_row("libc Library",
+                                libc_info[0],
+                                tab_stop=WIDE_COLUMN)
+        platform_rpt += add_row("libc Version",
+                                libc_info[1],
+                                tab_stop=WIDE_COLUMN)
     elif sys_name == "Darwin":
         platform_rpt += add_header("macOS")
         mac_ver = platform.mac_ver()
-        platform_rpt += add_row("macOS Version", mac_ver[0], tab_stop=WIDE_COLUMN)
+        platform_rpt += add_row("macOS Version",
+                                mac_ver[0],
+                                tab_stop=WIDE_COLUMN)
     elif sys_name == "Windows":
         platform_rpt += add_header("Windows")
         win_ver = platform.win32_ver()
