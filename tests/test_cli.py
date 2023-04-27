@@ -1,6 +1,5 @@
 from pathlib import Path
 
-import pytest
 from typer.testing import CliRunner
 
 from xplat import constants
@@ -17,13 +16,13 @@ def test_app():
 
 def test_version():
     result = _runner.invoke(app, ["--version"])
-    assert result.exit_code == constants.NO_ERRORS
+    assert result.exit_code == constants.NO_ERROR
     assert f"xplat version: {constants.VERSION}" in result.stdout
 
 
 def test_info():
     result = _runner.invoke(app, "info")
-    assert result.exit_code == constants.NO_ERRORS
+    assert result.exit_code == constants.NO_ERROR
     assert "System Information" in result.stdout
 
 

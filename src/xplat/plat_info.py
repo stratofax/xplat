@@ -1,24 +1,22 @@
-""" 
+"""
 Get information about the current platform, like system, OS, python.
 """
 
-import sys
 import platform
-
-# from venv import create
 
 NOT_FOUND = "(not found)"
 STD_COLUMN = 14
 WIDE_COLUMN = 28
 
 
-def add_header(label: str, tab_stop=WIDE_COLUMN, indent=2, char="-") -> str:
+def add_header(label: str, tab_stop: int = WIDE_COLUMN,
+               indent: int = 2, char: str = "-") -> str:
     """Add a header with suffix text and line decorations"""
     padding = char * (tab_stop - len(label))
     return f"\n{char * indent} {label} Information {padding}\n"
 
 
-def add_row(label: str, value: str, tab_stop=STD_COLUMN) -> str:
+def add_row(label: str, value: str, tab_stop: int = STD_COLUMN) -> str:
     """add a two-column row at specified tab stop"""
     padding = " " * (tab_stop - len(label))
     return f"{label}: {padding} {value}\n"
@@ -67,17 +65,22 @@ def create_platform_report() -> str:
 
     # execute platform-specific code
     sys_name = platform.system()
-    # sys_name = sys_info.system
     if sys_name == "Linux":
         platform_rpt += add_header("Linux")
         # libc_ver is a 2-element tuple
         libc_info = platform.libc_ver()
-        platform_rpt += add_row("libc Library", libc_info[0], tab_stop=WIDE_COLUMN)
-        platform_rpt += add_row("libc Version", libc_info[1], tab_stop=WIDE_COLUMN)
+        platform_rpt += add_row("libc Library",
+                                libc_info[0],
+                                tab_stop=WIDE_COLUMN)
+        platform_rpt += add_row("libc Version",
+                                libc_info[1],
+                                tab_stop=WIDE_COLUMN)
     elif sys_name == "Darwin":
         platform_rpt += add_header("macOS")
         mac_ver = platform.mac_ver()
-        platform_rpt += add_row("macOS Version", mac_ver[0], tab_stop=WIDE_COLUMN)
+        platform_rpt += add_row("macOS Version",
+                                mac_ver[0],
+                                tab_stop=WIDE_COLUMN)
     elif sys_name == "Windows":
         platform_rpt += add_header("Windows")
         win_ver = platform.win32_ver()

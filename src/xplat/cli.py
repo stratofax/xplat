@@ -10,18 +10,20 @@ from typing import Optional
 
 import typer
 
-from xplat import constants, list_files, pdf2img, plat_info, renamer
+from xplat import constants, list_files, pdf_to_img, plat_info, renamer
 
-NO_FILE_MATCH = -30
-BAD_FORMAT = -40
-USER_CANCEL = 10
+PROGRAM_NAME = constants.PROGRAM_NAME
 VERSION = constants.VERSION
+APP_HELP = constants.APP_HELP
+NO_ERROR = constants.NO_ERROR
+NO_FILE = constants.NO_FILE
+BAD_REQUEST = constants.BAD_REQUEST
 
 
 def version_callback(value: bool) -> None:
     """Display the version number and exit."""
     if value:
-        typer.echo(f"xplat version: {VERSION}")
+        typer.echo(f"{PROGRAM_NAME} version: {VERSION}")
         raise typer.Exit
 
 
@@ -42,8 +44,10 @@ def show_file_info(file_name: Path) -> None:
 
 
 def check_dir(dir_path: Path, dir_label: str = "") -> bool:
-    """Check if a directory exists, display error message if not.
-    dir_label is an optional label to describe the purpose of the directory path.
+    """
+    Check if a directory exists, display error message if not.
+    dir_label is an optional label to describe
+    the purpose of the directory path.
     """
     if dir_label != "":
         dir_label = f"{dir_label}: "
@@ -76,7 +80,8 @@ def print_files(files: list) -> int:
 def rename_list(
     f_list: list, output_dir: Path = None, dryrun: bool = False
 ) -> int:
-    """Rename a list of file paths to internet-friendly names, display results"""
+    """
+    Rename a list of file paths to internet-friendly names, display results"""
     if dryrun:
         typer.secho(
             "Dry run is active, proposed changes won't be saved.",
@@ -105,7 +110,7 @@ def convert_pdfs(
     for convert_count, f_name in enumerate(f_list, start=1):
         typer.echo("Converting PDF file:")
         typer.secho(f"{f_name}", fg=typer.colors.CYAN)
-        convert_results = pdf2img.pdf2img(
+        convert_results = pdf_to_img.pdf_to_img(
             f_name,
             output_dir,
             format=image_ext,
@@ -151,9 +156,7 @@ def convert_text(
     return None
 
 
-app = typer.Typer(
-    help="Cross-platform tools for batch file management and conversion"
-)
+app = typer.Typer(help=APP_HELP)
 
 
 @app.callback()
@@ -232,7 +235,7 @@ def names(
             "  Try a different extension, or skip '--ext' for all files.",
             fg=typer.colors.YELLOW,
         )
-        raise typer.Exit(code=NO_FILE_MATCH)
+        raise typer.Exit(code=NO_FILE)
 
     if output_dir is None:
         rename_existing = typer.prompt(
@@ -241,7 +244,7 @@ def names(
         # everything except y or Y cancels
         if rename_existing.lower() != "y":
             typer.echo("File name conversion cancelled.")
-            raise typer.Exit(code=USER_CANCEL)
+            raise typer.Exit(code=NO_ERROR)
         else:
             output_dir = source_dir
 
@@ -254,7 +257,7 @@ def names(
     # everything except y or Y cancels
     if rename_files.lower() != "y":
         typer.echo("Conversion cancelled.")
-        raise typer.Exit(code=USER_CANCEL)
+        raise typer.Exit(code=NO_ERROR)
     else:
         rename_total = rename_list(files, output_dir, dryrun=dry_run)
         plural = "s" if rename_total > 1 else ""
@@ -304,7 +307,7 @@ def pdfs(
             )
             for ext in formats:
                 typer.echo(f"  {ext}")
-            raise typer.Exit(code=BAD_FORMAT)
+            raise typer.Exit(code=BAD_REQUEST)
     grayscale = not full_color
     typer.echo(f"Converting PDFs to '{convert_format}' format ...")
     pdfs = list_files.create_file_list(source_dir, "pdf")
@@ -314,7 +317,7 @@ def pdfs(
             f"  No PDFs found in directory: {source_dir}",
             fg=typer.colors.YELLOW,
         )
-        raise typer.Exit(code=NO_FILE_MATCH)
+        raise typer.Exit(code=NO_FILE)
 
     typer.echo("Selected PDFs will be converted and saved to:")
     typer.secho(f"{output_dir}", fg=typer.colors.YELLOW)
@@ -325,7 +328,7 @@ def pdfs(
     # everything except y or Y cancels
     if pdfs_2_img.lower() != "y":
         typer.echo("PDF conversion cancelled.")
-        raise typer.Exit(code=USER_CANCEL)
+        raise typer.Exit(code=NO_ERROR)
     else:
         image_total = convert_pdfs(
             pdfs,
@@ -374,7 +377,7 @@ def text(
             f"  No {convert_from} files found in directory: {source_dir}",
             fg=typer.colors.YELLOW,
         )
-        raise typer.Exit(code=NO_FILE_MATCH)
+        raise typer.Exit(code=NO_FILE)
 
     typer.echo(
         f"Selected {convert_from} files will be converted and saved as {convert_to}."
@@ -386,7 +389,7 @@ def text(
     # everything except y or Y cancels
     if confirm_convert.lower() != "y":
         typer.echo("Text conversion cancelled.")
-        raise typer.Exit(code=USER_CANCEL)
+        raise typer.Exit(code=NO_ERROR)
     else:
         for text_total, file_name in enumerate(text_files, start=1):
             typer.secho(f"Converting: {file_name} ...", fg=typer.colors.CYAN)

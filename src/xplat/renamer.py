@@ -39,7 +39,6 @@ def safe_stem(orig_stem: str, delim: str = "_") -> str:
 def safe_renamer(
     abs_path: Path,
     target_dir: Path = None,
-    delim_chr: str = "_",
     dry_run: bool = False,
 ) -> str:
     """
@@ -71,7 +70,7 @@ def safe_renamer(
     if not dry_run:
         # check to see if file exists
         if new_path.exists():
-            raise FileExistsError(f"{new_path} already exists.")
+            return f"{new_filename} already exists, skipped."
         else:
             abs_path.rename(new_path)
     return new_path
