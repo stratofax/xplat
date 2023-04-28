@@ -60,6 +60,19 @@ def check_dir(dir_path: Path, dir_label: str = "") -> bool:
     return dir_path.is_dir()
 
 
+def print_header(ext: str) -> None:
+    """Print a header for the file list."""
+    if ext is not None:
+        list_label = f"Listing files with extension '.{ext}':"
+    else:
+        list_label = "Listing all files (no directories):"
+    typer.secho(
+        list_label,
+        fg=typer.colors.BRIGHT_YELLOW,
+    )
+    typer.echo("-" * len(list_label))
+
+
 def print_files(files: list) -> int:
     """Print a list of files, return the number of files found."""
     # sourcery skip: simplify-empty-collection-comparison
@@ -68,12 +81,16 @@ def print_files(files: list) -> int:
         file_count = 0
     else:
         for file_count, file_name in enumerate(files, start=1):
-            typer.secho(Path(file_name).name, fg=typer.colors.GREEN)
+            typer.secho(f"{file_count}) {Path(file_name).name}",
+                        fg=typer.colors.GREEN)
 
     # report the number of files found.
-    typer.secho(
-        f"Total files found = {file_count}", fg=typer.colors.BRIGHT_YELLOW
-    )
+    file_report = f"Total files found = {file_count}"
+    typer.echo("-" * len(file_report))
+    typer.secho(file_report,
+                fg=typer.colors.BRIGHT_YELLOW
+                )
+
     return file_count
 
 
@@ -138,7 +155,7 @@ def list(
         help="Case-sensitive file extension."
     ),
 ) -> None:
-    """List files in the specified or current directory."""
+    """List files in the specified directory, or single file info."""
     if path is None:
         path = Path.cwd()
     if path.is_file():
@@ -148,12 +165,19 @@ def list(
         """list directory contents"""
         if not check_dir(path, "File list"):
             raise typer.Exit(code=constants.NO_FILE)
-        if ext is not None:
-            typer.secho(
-                f"Listing files with extension '.{ext}':",
-                fg=typer.colors.BRIGHT_YELLOW,
-            )
-        print_files(list_files.create_file_list(path, ext))
+
+        print_header(ext)
+        files = list_files.create_file_list(path, ext)
+        print_files(files)
+        show_info = True
+        prompt_text = "Enter a number to show file info, or 'q' to quit"
+        while show_info:
+            file_selector = typer.prompt(prompt_text)
+            if file_selector == "q":
+                show_info = False
+            else:
+                index = int(file_selector) - 1
+                show_file_info(files[index])
 
 
 @app.command()
