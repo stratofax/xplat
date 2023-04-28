@@ -6,6 +6,14 @@ If you have to work with lots of files on different computing platforms, `xplat`
 
 Created for Python 3.9 or later, this package uses the [pathlib module, Object-oriented filesystem paths](https://docs.python.org/3/library/pathlib.html), introduced in Python 3.4, to work with files on all platforms.
 
+## xplat Features
+
+Designed from the start to work across platforms, `xplat` includes these features:
+
+* Extensive command-line help.
+* Tested on Mac, Linux, and Windows.
+* Works with individual files or directories.
+
 ## Getting Started
 
 1. Create a fork of this repo on your computer.
@@ -21,6 +29,12 @@ If the steps described above in the **Getting Started** section worked for you, 
 
 ```bash
 pytest
+```
+
+To see a code coverage report, enter:
+
+```bash
+pytest --cov-report term-missing --cov=src/
 ```
 
 If you find an error, please report it by creating an issue on this repo.
