@@ -169,7 +169,7 @@ def list(
         help="Case-sensitive file extension."
     ),
 ) -> None:
-    """List files in the specified directory, or single file info."""
+    """List files in a directory, or info for a file."""
     if path is None:
         path = Path.cwd()
     if path.is_file():
