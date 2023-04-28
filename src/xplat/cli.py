@@ -31,12 +31,12 @@ def show_file_info(file_name: Path) -> None:
     """Display file information for a file."""
     file_size = list_files.format_bytes(file_name.stat().st_size)
     typer.secho(f"{file_name}", fg=typer.colors.BRIGHT_GREEN)
-    typer.echo(f"  Size: {file_size}")
-    typer.echo(
-        f"  Modified: {list_files.format_timestamp(file_name.stat().st_mtime)}"
-    )
+    typer.echo(f"  Size:     {file_size}")
     typer.echo(
         f"  Created:  {list_files.format_timestamp(file_name.stat().st_ctime)}"
+    )
+    typer.echo(
+        f"  Modified: {list_files.format_timestamp(file_name.stat().st_mtime)}"
     )
     typer.echo(
         f"  Accessed: {list_files.format_timestamp(file_name.stat().st_atime)}"
@@ -116,6 +116,20 @@ def rename_list(
     return convert_count
 
 
+def show_selected_info(files: list, file_selector: str) -> None:
+    """Test input, display file information for a file."""
+    # catch invalid input
+    try:
+        index = int(file_selector) - 1
+    except ValueError:
+        typer.echo("Invalid input, please enter a number or 'q'.")
+        return
+    if index < 0 or index > len(files) - 1:
+        typer.echo("Invalid input, please enter a matching number.")
+        return
+    show_file_info(files[index])
+
+
 # CLI interface
 # sourcery skip: avoid-global-variables
 # module level variables are required by typer
@@ -176,8 +190,7 @@ def list(
             if file_selector == "q":
                 show_info = False
             else:
-                index = int(file_selector) - 1
-                show_file_info(files[index])
+                show_selected_info(files, file_selector)
 
 
 @app.command()
