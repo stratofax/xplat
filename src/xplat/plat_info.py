@@ -107,5 +107,6 @@ def create_platform_report() -> str:
 
 
 if __name__ == "__main__":   # pragma: no cover
-    platform_report = create_platform_report()
-    print(f"{platform_report}")
+    """Run the module as a script."""
+    _platform_report = create_platform_report()
+    print(f"{_platform_report}")
