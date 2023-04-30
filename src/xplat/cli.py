@@ -108,6 +108,7 @@ def rename_list(
         start_label = "Proposing file name change from:"
     else:
         start_label = "Converting file name:"
+
     for convert_count, f_name in enumerate(f_list, start=1):
         typer.echo(start_label)
         typer.secho(f"{f_name}", fg=typer.colors.CYAN)
