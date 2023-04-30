@@ -66,6 +66,7 @@ def print_header(ext: str) -> None:
         list_label = f"Listing files with extension '.{ext}':"
     else:
         list_label = "Listing all files (no directories):"
+    typer.echo("-" * len(list_label))
     typer.secho(
         list_label,
         fg=typer.colors.BRIGHT_YELLOW,
@@ -116,18 +117,22 @@ def rename_list(
     return convert_count
 
 
-def show_selected_info(files: list, file_selector: str) -> None:
+def show_selected_info(files: list, file_selector: str) -> str:
     """Test input, display file information for a file."""
     # catch invalid input
     try:
         index = int(file_selector) - 1
     except ValueError:
-        typer.echo("Invalid input, please enter a number or 'q'.")
-        return
+        return "Invalid input, please enter a number or 'q'.\n"
     if index < 0 or index > len(files) - 1:
-        typer.echo("Invalid input, please enter a matching number.")
-        return
+        out_of_range = f"The number {file_selector} is out of range.\n"
+        out_of_range += "Please enter a matching number.\n"
+        return out_of_range
     show_file_info(files[index])
+    quit_now = typer.prompt("Enter 'q' to quit, any other key to continue")
+    if quit_now == "q":
+        raise typer.Exit
+    return ""
 
 
 # CLI interface
@@ -180,17 +185,18 @@ def list(
         if not check_dir(path, "File list"):
             raise typer.Exit(code=constants.NO_FILE)
 
-        print_header(ext)
         files = list_files.create_file_list(path, ext)
-        print_files(files)
         show_info = True
-        prompt_text = "Enter a number to show file info, or 'q' to quit"
+        prompt = "Enter a number to show file info, or 'q' to quit"
+        full_prompt = prompt
         while show_info:
-            file_selector = typer.prompt(prompt_text)
+            print_header(ext)
+            print_files(files)
+            file_selector = typer.prompt(full_prompt)
             if file_selector == "q":
                 show_info = False
             else:
-                show_selected_info(files, file_selector)
+                full_prompt = show_selected_info(files, file_selector) + prompt
 
 
 @app.command()
