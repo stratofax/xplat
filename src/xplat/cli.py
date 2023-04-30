@@ -183,7 +183,7 @@ def list(
     else:
         """list directory contents"""
         if not check_dir(path, "File list"):
-            raise typer.Exit(code=constants.NO_FILE)
+            raise typer.Exit(code=NO_FILE)
 
         files = list_files.create_file_list(path, ext)
         show_info = True
@@ -216,10 +216,10 @@ def rename(
     """Convert file names for cross-platform compatibility."""
     # use Typer to ensure we get a source directory
     if not check_dir(source_dir, "Source"):
-        raise typer.Exit(code=constants.NO_FILE)
+        raise typer.Exit(code=NO_FILE)
     # output directory is optional
     if output_dir is not None and not check_dir(output_dir, "Output"):
-        raise typer.Exit(code=constants.NO_FILE)
+        raise typer.Exit(code=NO_FILE)
 
     files = list_files.create_file_list(source_dir, ext)
     files_found = print_files(files)
@@ -232,31 +232,31 @@ def rename(
 
     if output_dir is None:
         rename_existing = typer.prompt(
-            "No output directory specified. Rename files? [y/N]"
+            "No output directory specified. Rename files? [y/n]"
         )
         # everything except y or Y cancels
         if rename_existing.lower() != "y":
             typer.echo("File name conversion cancelled.")
             raise typer.Exit(code=NO_ERROR)
-        else:
-            output_dir = source_dir
+
+        output_dir = source_dir
 
     typer.echo("Selected files will be renamed and saved to:")
     typer.secho(f"{output_dir}", fg=typer.colors.YELLOW)
     plural = "s" if files_found > 1 else ""
     rename_files = typer.prompt(
-        f"Rename {files_found} file{plural} of type '{ext}'? [y/N]",
+        f"Rename {files_found} file{plural} of type '{ext}'? [y/n]",
     )
     # everything except y or Y cancels
     if rename_files.lower() != "y":
         typer.echo("Conversion cancelled.")
         raise typer.Exit(code=NO_ERROR)
-    else:
-        rename_total = rename_list(files, output_dir, dryrun=dry_run)
-        plural = "s" if rename_total > 1 else ""
-        typer.echo(
-            f"Processed {rename_total} file{plural} of {files_found} found."
-        )
+
+    rename_total = rename_list(files, output_dir, dryrun=dry_run)
+    plural = "s" if rename_total > 1 else ""
+    typer.echo(
+        f"Processed {rename_total} file{plural} of {files_found} found."
+    )
 
 
 if __name__ == "__main__":
