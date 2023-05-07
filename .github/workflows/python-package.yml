@@ -41,10 +41,12 @@ jobs:
           python-version: ${{ matrix.python-version }}
           # poetry cache required to use poetry
           cache: "poetry"
+      - name: Create coverage directory
+        run: mkdir -p coverage
       # install flake8 for testing
       - run: poetry add flake8
       - run: poetry install
-      - run: poetry run pytest --cov=xplat --cov-report=lcov:.coverage/lcov.info tests/
+      - run: poetry run pytest --cov=xplat --cov-report=lcov:coverage/lcov.info tests/
 
       - name: lint with flake8
         run: |
@@ -54,3 +56,5 @@ jobs:
           poetry run flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
       - name: Coveralls GitHub Action
         uses: coverallsapp/github-action@v1
+        with:
+          path-to-lcov: coverage/lcov.info
