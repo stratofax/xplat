@@ -147,18 +147,14 @@ def test_print_selected_info(monkeypatch):
     # Test for out-of-range input
     file_selector = "5"
     result = print_selected_info(files, file_selector)
-    expected_result = f"The number {file_selector} is out of range.\nPlease enter a matching number.\n"
+    expected_result = f"The number {file_selector} is out of range.\n"
+    expected_result += "Please enter a matching number.\n"
     assert (
         result == expected_result
     ), "Incorrect error message for out-of-range input."
 
-    # Test for valid input and user input handling
-
-    # Mock the typer.prompt function to simulate user input
-    # monkeypatch.setattr("typer.prompt", lambda _: "not_q")
-
     # The files in the files list are not real files
-    # Test for non-existent path, user choosing to quit
+    # Test for non-existent path, user choosing to continue
     file_selector = "1"
     monkeypatch.setattr("typer.prompt", lambda _: "c")
     expected_result = "Select another file to examine.\n"
