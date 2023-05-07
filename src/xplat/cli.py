@@ -29,6 +29,14 @@ def version_callback(value: bool) -> None:
 
 def show_file_info(file_name: Path) -> None:
     """Display file information for a file."""
+    # check if file_name is a Path object
+    if not isinstance(file_name, Path):
+        typer.secho(
+            f"'{file_name}' is not a path to a file.",
+            fg=typer.colors.BRIGHT_WHITE,
+            bg=typer.colors.RED,
+        )
+        return
     file_size = list_files.format_bytes(file_name.stat().st_size)
     typer.secho(f"{file_name}", fg=typer.colors.BRIGHT_GREEN)
     typer.echo(f"  Size:     {file_size}")
@@ -82,15 +90,14 @@ def print_files(files: list) -> int:
         file_count = 0
     else:
         for file_count, file_name in enumerate(files, start=1):
-            typer.secho(f"{file_count}) {Path(file_name).name}",
-                        fg=typer.colors.GREEN)
+            typer.secho(
+                f"{file_count}) {Path(file_name).name}", fg=typer.colors.GREEN
+            )
 
     # report the number of files found.
     file_report = f"Total files found = {file_count}"
     typer.echo("-" * len(file_report))
-    typer.secho(file_report,
-                fg=typer.colors.BRIGHT_YELLOW
-                )
+    typer.secho(file_report, fg=typer.colors.BRIGHT_YELLOW)
 
     return file_count
 
@@ -165,14 +172,10 @@ def info() -> None:
 @app.command()
 def list(
     path: Optional[Path] = typer.Argument(
-        None,
-        help="Directory to list files from (current if none)."
+        None, help="Directory to list files from (current if none)."
     ),
     ext: str = typer.Option(
-        None,
-        "--ext",
-        "-x",
-        help="Case-sensitive file extension."
+        None, "--ext", "-x", help="Case-sensitive file extension."
     ),
 ) -> None:
     """List files in a directory, or info for a file."""
