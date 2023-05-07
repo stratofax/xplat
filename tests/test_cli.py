@@ -10,8 +10,8 @@ from xplat.cli import (
     app,
     check_dir,
     print_files,
+    print_selected_info,
     rename_list,
-    show_selected_info,
 )
 
 _runner = CliRunner()
@@ -73,6 +73,9 @@ def test_list():
         file.unlink()
     # remove test dir
     test_path.rmdir()
+    # attempt to list files in non-existent directory
+    test_list_dir = _runner.invoke(app, ["list", str(test_path)], input="q\n")
+    assert test_list_dir.exit_code == constants.NO_FILE
     # check for non-existent directory
     assert check_dir(test_path, "Test") is False
 
@@ -106,8 +109,7 @@ def test_rename_list():
         )
         assert convert_count == len(
             new_names
-        ), "Incorrect number of files \
-                                                 processed in dryrun mode."
+        ), "Incorrect number of files processed in dryrun mode."
 
         # Check that the original files are still present and unchanged
         for file_path in new_names:
@@ -122,52 +124,49 @@ def test_rename_list():
         )
         assert convert_count == len(
             new_names
-        ), "Incorrect number of \
-                                                 files processed in \
-                                                 normal mode."
+        ), "Incorrect number of files processed in normal mode."
 
         # Check that the original files have been renamed
         for file_path in new_names:
             assert (
                 not file_path.exists()
-            ), f"File {file_path} \
-                                             should have been renamed."
+            ), f"File {file_path} should have been renamed."
 
 
-def test_show_selected_info(monkeypatch):
+def test_print_selected_info(monkeypatch):
     # Sample files list
     files = ["file1.txt", "file2.txt", "file3.txt"]
 
     # Test for invalid input
     file_selector = "invalid"
-    result = show_selected_info(files, file_selector)
+    result = print_selected_info(files, file_selector)
     assert (
         result == "Invalid input, please enter a number or 'q'.\n"
     ), "Incorrect error message for invalid input."
 
     # Test for out-of-range input
     file_selector = "5"
-    result = show_selected_info(files, file_selector)
+    result = print_selected_info(files, file_selector)
     expected_result = f"The number {file_selector} is out of range.\nPlease enter a matching number.\n"
     assert (
         result == expected_result
     ), "Incorrect error message for out-of-range input."
 
-    # The files in the files list are not real files
     # Test for valid input and user input handling
 
     # Mock the typer.prompt function to simulate user input
     # monkeypatch.setattr("typer.prompt", lambda _: "not_q")
 
-    # Test for valid input and user choosing to continue
-    # file_selector = "1"
-    # with pytest.raises(Exception) as exc_info:
-    #     show_selected_info(files, file_selector)
-    # assert "Enter 'q' to quit, any other key to continue" in str(
-    #     exc_info.value
-    # ), "Expected user input prompt not found."
-
-    # Test for valid input and user choosing to quit
-    # monkeypatch.setattr("typer.prompt", lambda _: "q")
-    # with pytest.raises(Exit):
-    #     show_selected_info(files, file_selector)
+    # The files in the files list are not real files
+    # Test for non-existent path, user choosing to quit
+    file_selector = "1"
+    monkeypatch.setattr("typer.prompt", lambda _: "c")
+    expected_result = "Select another file to examine.\n"
+    result = print_selected_info(files, file_selector)
+    assert expected_result in result, "Expected error message not found."
+    # Test for non-existent path, user choosing to quit
+    monkeypatch.setattr("typer.prompt", lambda _: "q")
+    expected_error = "is not a path to a file."
+    with pytest.raises(Exit):
+        result = print_selected_info(files, file_selector)
+        assert expected_error in result, "Expected error message not found."

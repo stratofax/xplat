@@ -1,6 +1,8 @@
 """File handling functions."""
+from dataclasses import InitVar, dataclass
 from datetime import datetime
 from pathlib import Path
+from typing import Optional
 
 
 def format_bytes(num_bytes: int) -> str:
@@ -23,3 +25,20 @@ def create_file_list(dir_path: Path, file_glob: str = None) -> list:
     file_glob = file_glob.lstrip(".")
     globber = f"*.{file_glob}"
     return sorted(dir_path.glob(globber))
+
+
+@dataclass
+class FileInfo:
+    """Class to hold file information"""
+
+    name: InitVar[Path]
+    size: Optional[str] = None
+    created: Optional[str] = None
+    modified: Optional[str] = None
+    accessed: Optional[str] = None
+
+    def __post_init__(self, name):
+        self.size = format_bytes(name.stat().st_size)
+        self.created = format_timestamp(name.stat().st_ctime)
+        self.modified = format_timestamp(name.stat().st_mtime)
+        self.accessed = format_timestamp(name.stat().st_atime)

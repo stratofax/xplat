@@ -27,30 +27,6 @@ def version_callback(value: bool) -> None:
         raise typer.Exit
 
 
-def show_file_info(file_name: Path) -> None:
-    """Display file information for a file."""
-    # check if file_name is a Path object
-    if not isinstance(file_name, Path):
-        typer.secho(
-            f"'{file_name}' is not a path to a file.",
-            fg=typer.colors.BRIGHT_WHITE,
-            bg=typer.colors.RED,
-        )
-        return
-    file_size = list_files.format_bytes(file_name.stat().st_size)
-    typer.secho(f"{file_name}", fg=typer.colors.BRIGHT_GREEN)
-    typer.echo(f"  Size:     {file_size}")
-    typer.echo(
-        f"  Created:  {list_files.format_timestamp(file_name.stat().st_ctime)}"
-    )
-    typer.echo(
-        f"  Modified: {list_files.format_timestamp(file_name.stat().st_mtime)}"
-    )
-    typer.echo(
-        f"  Accessed: {list_files.format_timestamp(file_name.stat().st_atime)}"
-    )
-
-
 def check_dir(dir_path: Path, dir_label: str = "") -> bool:
     """
     Check if a directory exists, display error message if not.
@@ -125,7 +101,25 @@ def rename_list(
     return convert_count
 
 
-def show_selected_info(files: list, file_selector: str) -> str:
+def print_file_info(file_name: Path) -> None:
+    """Display file information for a file."""
+    # check if file_name is a Path object
+    if not isinstance(file_name, Path):
+        typer.secho(
+            f"'{file_name}' is not a path to a file.",
+            fg=typer.colors.BRIGHT_WHITE,
+            bg=typer.colors.RED,
+        )
+        return
+    file_info = list_files.FileInfo(file_name)
+    typer.secho(f"{file_name}", fg=typer.colors.BRIGHT_GREEN)
+    typer.echo(f"  Size:     {file_info.size}")
+    typer.echo(f"  Created:  {file_info.created}")
+    typer.echo(f"  Modified: {file_info.modified}")
+    typer.echo(f"  Accessed: {file_info.accessed}")
+
+
+def print_selected_info(files: list, file_selector: str) -> str:
     """Test input, display file information for a file."""
     # catch invalid input
     try:
@@ -136,11 +130,27 @@ def show_selected_info(files: list, file_selector: str) -> str:
         out_of_range = f"The number {file_selector} is out of range.\n"
         out_of_range += "Please enter a matching number.\n"
         return out_of_range
-    show_file_info(files[index])
-    quit_now = typer.prompt("Enter 'q' to quit, any other key to continue")
+    print_file_info(files[index])
+    quit_now = typer.prompt("Enter 'q' to quit, 'c' to continue")
     if quit_now == "q":
         raise typer.Exit
-    return ""
+    return "Select another file to examine.\n"
+
+
+def review_files(path: Path, ext: str = None) -> None:
+    """Display a list of files and prompt for file selection."""
+    files = list_files.create_file_list(path, ext)
+    prompt = "Enter a number to show file info, or 'q' to quit"
+    full_prompt = prompt
+    show_info = True
+    while show_info:
+        print_header(ext)
+        print_files(files)
+        file_selector = typer.prompt(full_prompt)
+        if file_selector == "q":
+            show_info = False
+        else:
+            full_prompt = print_selected_info(files, file_selector) + prompt
 
 
 # CLI interface
@@ -183,24 +193,13 @@ def list(
         path = Path.cwd()
     if path.is_file():
         """list file information"""
-        show_file_info(path)
+        print_file_info(path)
     else:
         """list directory contents"""
         if not check_dir(path, "File list"):
             raise typer.Exit(code=NO_FILE)
 
-        files = list_files.create_file_list(path, ext)
-        show_info = True
-        prompt = "Enter a number to show file info, or 'q' to quit"
-        full_prompt = prompt
-        while show_info:
-            print_header(ext)
-            print_files(files)
-            file_selector = typer.prompt(full_prompt)
-            if file_selector == "q":
-                show_info = False
-            else:
-                full_prompt = show_selected_info(files, file_selector) + prompt
+        review_files(path, ext)
 
 
 @app.command()
