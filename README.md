@@ -1,5 +1,7 @@
 # xplat
 
+[![Coverage Status](https://coveralls.io/repos/github/stratofax/xplat/badge.svg?branch=main)](https://coveralls.io/github/stratofax/xplat?branch=main)
+
 ## Cross-platform Python tools for batch file management and conversion at the command line
 
 If you have to work with lots of files on different computing platforms, `xplat` is here to help. Uploading files from your notebook to a web server? Use `xplat rename` to change the file names so they won't break your web browser. Want to know more about your computer or Python installation? Use `xplat info` for a detailed system report.
