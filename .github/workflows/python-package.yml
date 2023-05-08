@@ -44,8 +44,8 @@ jobs:
       # install flake8 for testing
       - run: poetry add flake8
       - run: poetry install
-      # - run: poetry run pytest --cov=./ --cov-report=lcov tests/
-      - run: poetry run pytest
+      - run: poetry run pytest --cov=./ --cov-report=lcov tests/
+      # - run: poetry run pytest
 
       - name: lint with flake8
         run: |
