@@ -134,3 +134,8 @@ dmypy.json
 
 # VSCode
 /.vscode/
+
+# Temp and swap
+*.swp
+*.tmp
+
