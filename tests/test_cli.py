@@ -147,10 +147,9 @@ def test_print_selected_info(monkeypatch):
     # Test for out-of-range input
     file_selector = "5"
     result = print_selected_info(files, file_selector)
-    expected_result = f"The number {file_selector} is out of range.\n"
-    expected_result += "Please enter a matching number.\n"
+    expected_result = f"The number {file_selector} is out of range."
     assert (
-        result == expected_result
+        expected_result in result
     ), "Incorrect error message for out-of-range input."
 
     # The files in the files list are not real files

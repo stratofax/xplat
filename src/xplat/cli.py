@@ -31,7 +31,8 @@ def version_callback(is_version_requested: bool) -> None:
 
 def check_dir(dir_path: Path, dir_label: str = "") -> bool:
     """
-    Check if a directory exists, display error message if not
+    Return True if a directory exists,
+    display error message, return false if not
     dir_label is an optional label to describe
     the purpose of the directory path
     """
@@ -47,9 +48,8 @@ def check_dir(dir_path: Path, dir_label: str = "") -> bool:
 
 def check_file(file_name: Path) -> bool:
     """
-    Check if a file exists, display error message if not
-    file_label is an optional label to describe
-    the purpose of the file path
+    Return True if a file exists,
+    display error message, return False if not
     """
     # check if file_name is a Path object
     if not isinstance(file_name, Path):
@@ -133,21 +133,20 @@ def print_file_info(file_name: Path) -> None:
         print_file_data(FileInfo(file_name))
 
 
-def print_selected_info(files: list, index: str) -> str:
+def print_selected_info(files: list, selected: str) -> str:
     """Display file information for a selected file."""
     try:
-        file_index = int(index) - 1
+        file_index = int(selected) - 1
     except ValueError:
         return "Invalid input, please enter a number or 'q'.\n"
 
     if file_index < 0 or file_index > len(files) - 1:
-        message = f"The number {index} is out of range.\n"
-        message += "Please enter a matching number.\n"
+        message = f"The number {selected} is out of range.\n"
+        message += "Please enter a number between 1 and {len(files)}.\n"
         return message
 
     print_file_info(files[file_index])
     user_input = typer.prompt("Enter 'q' to quit, 'c' to continue")
-
     if user_input == "q":
         raise typer.Exit(code=NO_ERROR)
 
