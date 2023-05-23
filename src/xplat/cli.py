@@ -20,11 +20,11 @@ NO_FILE = constants.NO_FILE
 BAD_REQUEST = constants.BAD_REQUEST
 
 
-def version_callback(value: bool) -> None:
+def version_callback(is_version_requested: bool) -> None:
     """Display the version number and exit."""
-    if value:
+    if is_version_requested:
         typer.echo(f"{PROGRAM_NAME} version: {VERSION}")
-        raise typer.Exit
+        raise typer.Exit(NO_ERROR)
 
 
 def check_dir(dir_path: Path, dir_label: str = "") -> bool:
@@ -137,20 +137,18 @@ def print_selected_info(files: list, file_selector: str) -> str:
     return "Select another file to examine.\n"
 
 
-def review_files(path: Path, ext: str = None) -> None:
-    """Display a list of files and prompt for file selection."""
-    files = list_files.create_file_list(path, ext)
+def review_files(directory: Path, extension: str = None) -> None:
+    """Displays a list of files and prompts for file selection."""
+    files = list_files.create_file_list(directory, extension)
     prompt = "Enter a number to show file info, or 'q' to quit"
     full_prompt = prompt
-    show_info = True
-    while show_info:
-        print_header(ext)
+    while True:
+        print_header(extension)
         print_files(files)
         file_selector = typer.prompt(full_prompt)
         if file_selector == "q":
-            show_info = False
-        else:
-            full_prompt = print_selected_info(files, file_selector) + prompt
+            break
+        full_prompt = print_selected_info(files, file_selector) + prompt
 
 
 # CLI interface
