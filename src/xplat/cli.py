@@ -36,12 +36,17 @@ def check_dir(dir_path: Path, dir_label: str = "") -> bool:
     if dir_label != "":
         dir_label = f"{dir_label}: "
     if not dir_path.is_dir():
-        typer.secho(
-            f"{dir_label}'{dir_path}' is not a directory.",
-            fg=typer.colors.BRIGHT_WHITE,
-            bg=typer.colors.RED,
-        )
+        print_error(f"{dir_label}'{dir_path}' is not a directory.")
     return dir_path.is_dir()
+
+
+def print_error(msg: str) -> None:
+    """Display an error message"""
+    typer.secho(
+        msg,
+        fg=typer.colors.BRIGHT_WHITE,
+        bg=typer.colors.RED,
+    )
 
 
 def print_header(ext: str) -> None:
@@ -102,14 +107,10 @@ def rename_list(
 
 
 def print_file_info(file_name: Path) -> None:
-    """Display file information for a file."""
+    """Display file information for a file"""
     # check if file_name is a Path object
     if not isinstance(file_name, Path):
-        typer.secho(
-            f"'{file_name}' is not a path to a file.",
-            fg=typer.colors.BRIGHT_WHITE,
-            bg=typer.colors.RED,
-        )
+        print_error(f"'{file_name}' is not a path to a file.")
         return
     file_info = list_files.FileInfo(file_name)
     typer.secho(f"{file_name}", fg=typer.colors.BRIGHT_GREEN)
