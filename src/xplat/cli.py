@@ -10,8 +10,10 @@ from typing import Optional
 
 import typer
 
-from xplat import constants, list_files, plat_info, renamer
+from xplat import constants, plat_info, renamer
+from xplat.list_files import FileInfo, create_file_list
 
+# numeric constants
 PROGRAM_NAME = constants.PROGRAM_NAME
 VERSION = constants.VERSION
 APP_HELP = constants.APP_HELP
@@ -21,27 +23,49 @@ BAD_REQUEST = constants.BAD_REQUEST
 
 
 def version_callback(is_version_requested: bool) -> None:
-    """Display the version number and exit."""
+    """Display the version number and exit"""
     if is_version_requested:
         typer.echo(f"{PROGRAM_NAME} version: {VERSION}")
-        raise typer.Exit(NO_ERROR)
+        raise typer.Exit(code=NO_ERROR)
 
 
 def check_dir(dir_path: Path, dir_label: str = "") -> bool:
     """
-    Check if a directory exists, display error message if not.
+    Check if a directory exists, display error message if not
     dir_label is an optional label to describe
-    the purpose of the directory path.
+    the purpose of the directory path
     """
+    # display directory label if provided
     if dir_label != "":
         dir_label = f"{dir_label}: "
-    if not dir_path.is_dir():
+
+    dir_exist = dir_path.is_dir()
+    if not dir_exist:
         print_error(f"{dir_label}'{dir_path}' is not a directory.")
-    return dir_path.is_dir()
+    return dir_exist
+
+
+def check_file(file_name: Path) -> bool:
+    """
+    Check if a file exists, display error message if not
+    file_label is an optional label to describe
+    the purpose of the file path
+    """
+    # check if file_name is a Path object
+    if not isinstance(file_name, Path):
+        print_error(f"'{file_name}' is not a path to a file.")
+        return False
+
+    file_exist = file_name.is_file()
+    if not file_exist:
+        print_error(f"'{file_name}' is not a file.")
+    return file_exist
 
 
 def print_error(msg: str) -> None:
-    """Display an error message"""
+    """
+    Display an error message
+    """
     typer.secho(
         msg,
         fg=typer.colors.BRIGHT_WHITE,
@@ -50,21 +74,28 @@ def print_error(msg: str) -> None:
 
 
 def print_header(ext: str) -> None:
-    """Print a header for the file list."""
+    """
+    Print a header for the file list
+    """
     if ext is not None:
         list_label = f"Listing files with extension '.{ext}':"
     else:
         list_label = "Listing all files (no directories):"
-    typer.echo("-" * len(list_label))
+
+    label_border = "-" * len(list_label)
+    typer.echo(label_border)
     typer.secho(
         list_label,
         fg=typer.colors.BRIGHT_YELLOW,
     )
-    typer.echo("-" * len(list_label))
+    typer.echo(label_border)
 
 
 def print_files(files: list) -> int:
-    """Print a list of files, return the number of files found."""
+    """
+    Print a list of files,
+    return the number of files found
+    """
     # sourcery skip: simplify-empty-collection-comparison
     # testing for the empty list works reliably, unlike boolean test
     if files == []:
@@ -83,11 +114,52 @@ def print_files(files: list) -> int:
     return file_count
 
 
+def print_file_data(file_info: FileInfo) -> None:
+    """
+    Print file properties in indented table format
+    """
+    typer.secho(f"{file_info.file_name}", fg=typer.colors.BRIGHT_GREEN)
+    typer.echo(f"  Size:     {file_info.size}")
+    typer.echo(f"  Created:  {file_info.created}")
+    typer.echo(f"  Modified: {file_info.modified}")
+    typer.echo(f"  Accessed: {file_info.accessed}")
+
+
+def print_file_info(file_name: Path) -> None:
+    """
+    Display file information for a file
+    """
+    if check_file(file_name):
+        print_file_data(FileInfo(file_name))
+
+
+def print_selected_info(files: list, index: str) -> str:
+    """Display file information for a selected file."""
+    try:
+        file_index = int(index) - 1
+    except ValueError:
+        return "Invalid input, please enter a number or 'q'.\n"
+
+    if file_index < 0 or file_index > len(files) - 1:
+        message = f"The number {index} is out of range.\n"
+        message += "Please enter a matching number.\n"
+        return message
+
+    print_file_info(files[file_index])
+    user_input = typer.prompt("Enter 'q' to quit, 'c' to continue")
+
+    if user_input == "q":
+        raise typer.Exit(code=NO_ERROR)
+
+    return "Select another file to examine.\n"
+
+
 def rename_list(
     f_list: list, output_dir: Path = None, dryrun: bool = False
 ) -> int:
     """
-    Rename a list of file paths to internet-friendly names, display results"""
+    Rename a list of file paths to internet-friendly names, display results
+    """
     if dryrun:
         typer.secho(
             "Dry run is active, proposed changes won't be saved.",
@@ -103,53 +175,29 @@ def rename_list(
         typer.echo("  to:")
         new_file_name = renamer.safe_renamer(f_name, output_dir, dryrun)
         typer.secho(f"{new_file_name}", fg=typer.colors.BRIGHT_CYAN)
+
     return convert_count
 
 
-def print_file_info(file_name: Path) -> None:
-    """Display file information for a file"""
-    # check if file_name is a Path object
-    if not isinstance(file_name, Path):
-        print_error(f"'{file_name}' is not a path to a file.")
-        return
-    file_info = list_files.FileInfo(file_name)
-    typer.secho(f"{file_name}", fg=typer.colors.BRIGHT_GREEN)
-    typer.echo(f"  Size:     {file_info.size}")
-    typer.echo(f"  Created:  {file_info.created}")
-    typer.echo(f"  Modified: {file_info.modified}")
-    typer.echo(f"  Accessed: {file_info.accessed}")
-
-
-def print_selected_info(files: list, file_selector: str) -> str:
-    """Test input, display file information for a file."""
-    # catch invalid input
-    try:
-        index = int(file_selector) - 1
-    except ValueError:
-        return "Invalid input, please enter a number or 'q'.\n"
-    if index < 0 or index > len(files) - 1:
-        out_of_range = f"The number {file_selector} is out of range.\n"
-        out_of_range += "Please enter a matching number.\n"
-        return out_of_range
-    print_file_info(files[index])
-    quit_now = typer.prompt("Enter 'q' to quit, 'c' to continue")
-    if quit_now == "q":
-        raise typer.Exit
-    return "Select another file to examine.\n"
-
-
 def review_files(directory: Path, extension: str = None) -> None:
-    """Displays a list of files and prompts for file selection."""
-    files = list_files.create_file_list(directory, extension)
-    prompt = "Enter a number to show file info, or 'q' to quit"
-    full_prompt = prompt
+    """
+    Displays a list of files and prompts for file selection
+    """
+    files = create_file_list(directory, extension)
+    basic_prompt = "Enter a number to show file info, or 'q' to quit"
+    full_prompt = basic_prompt
+
+    # repeat until the user quits
     while True:
         print_header(extension)
         print_files(files)
+
         file_selector = typer.prompt(full_prompt)
+
         if file_selector == "q":
             break
-        full_prompt = print_selected_info(files, file_selector) + prompt
+
+        full_prompt = print_selected_info(files, file_selector) + basic_prompt
 
 
 # CLI interface
@@ -215,7 +263,9 @@ def rename(
         False, help="Only display (don't save) proposed name changes"
     ),
 ) -> None:
-    """Convert file names for cross-platform compatibility."""
+    """
+    Convert file names for cross-platform compatibility
+    """
     # use Typer to ensure we get a source directory
     if not check_dir(source_dir, "Source"):
         raise typer.Exit(code=NO_FILE)
@@ -223,7 +273,7 @@ def rename(
     if output_dir is not None and not check_dir(output_dir, "Output"):
         raise typer.Exit(code=NO_FILE)
 
-    files = list_files.create_file_list(source_dir, ext)
+    files = create_file_list(source_dir, ext)
     files_found = print_files(files)
     if files_found == 0:
         typer.secho(

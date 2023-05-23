@@ -1,5 +1,5 @@
 """File handling functions."""
-from dataclasses import InitVar, dataclass
+from dataclasses import dataclass
 from datetime import datetime
 from pathlib import Path
 from typing import Optional
@@ -31,14 +31,14 @@ def create_file_list(dir_path: Path, file_glob: str = None) -> list:
 class FileInfo:
     """Class to hold file information"""
 
-    name: InitVar[Path]
+    file_name: Path
     size: Optional[str] = None
     created: Optional[str] = None
     modified: Optional[str] = None
     accessed: Optional[str] = None
 
-    def __post_init__(self, name):
-        self.size = format_bytes(name.stat().st_size)
-        self.created = format_timestamp(name.stat().st_ctime)
-        self.modified = format_timestamp(name.stat().st_mtime)
-        self.accessed = format_timestamp(name.stat().st_atime)
+    def __post_init__(self) -> None:
+        self.size = format_bytes(self.file_name.stat().st_size)
+        self.created = format_timestamp(self.file_name.stat().st_ctime)
+        self.modified = format_timestamp(self.file_name.stat().st_mtime)
+        self.accessed = format_timestamp(self.file_name.stat().st_atime)
