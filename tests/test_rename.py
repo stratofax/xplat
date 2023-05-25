@@ -2,7 +2,7 @@ from pathlib import Path
 
 import pytest
 
-from xplat import renamer
+from xplat import rename
 
 # test in home dir
 # create test & output dir
@@ -20,7 +20,7 @@ _dryrun_file.touch(exist_ok=True)
 
 
 def append_file_name(_file: Path, _dryrun: bool):
-    new_name = renamer.safe_renamer(_file, dry_run=_dryrun)
+    new_name = rename.safe_renamer(_file, dry_run=_dryrun)
     with open(_file, "w") as t_file:
         # write the new name to the test file
         t_file.write(f"{new_name} - {_dryrun}")
@@ -29,13 +29,13 @@ def append_file_name(_file: Path, _dryrun: bool):
 def test_bad_file():
     bad_file = _test_path / "not_a_file.tmp"
     with pytest.raises(FileNotFoundError):
-        renamer.safe_renamer(bad_file, dry_run=True)
+        rename.safe_renamer(bad_file, dry_run=True)
 
 
 def test_bad_dir():
     bad_dir = _test_path.joinpath("not_a_dir")
     with pytest.raises(FileNotFoundError):
-        renamer.safe_renamer(_dryrun_file, target_dir=bad_dir, dry_run=True)
+        rename.safe_renamer(_dryrun_file, target_dir=bad_dir, dry_run=True)
 
 
 # def test_renamer_dryrun():

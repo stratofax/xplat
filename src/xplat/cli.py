@@ -10,8 +10,10 @@ from typing import Optional
 
 import typer
 
-from xplat import constants, plat_info, renamer
-from xplat.list_files import FileInfo, create_file_list
+from xplat import constants
+from xplat.info import create_platform_report
+from xplat.list import FileInfo, check_dir, check_file, create_file_list
+from xplat.rename import safe_renamer
 
 # numeric constants
 PROGRAM_NAME = constants.PROGRAM_NAME
@@ -27,39 +29,6 @@ def version_callback(is_version_requested: bool) -> None:
     if is_version_requested:
         typer.echo(f"{PROGRAM_NAME} version: {VERSION}")
         raise typer.Exit(code=NO_ERROR)
-
-
-def check_dir(dir_path: Path, dir_label: str = "") -> bool:
-    """
-    Return True if a directory exists,
-    display error message, return false if not
-    dir_label is an optional label to describe
-    the purpose of the directory path
-    """
-    # display directory label if provided
-    if dir_label != "":
-        dir_label = f"{dir_label}: "
-
-    dir_exist = dir_path.is_dir()
-    if not dir_exist:
-        print_error(f"{dir_label}'{dir_path}' is not a directory.")
-    return dir_exist
-
-
-def check_file(file_name: Path) -> bool:
-    """
-    Return True if a file exists,
-    display error message, return False if not
-    """
-    # check if file_name is a Path object
-    if not isinstance(file_name, Path):
-        print_error(f"'{file_name}' is not a path to a file.")
-        return False
-
-    file_exist = file_name.is_file()
-    if not file_exist:
-        print_error(f"'{file_name}' is not a file.")
-    return file_exist
 
 
 def print_error(msg: str) -> None:
@@ -129,53 +98,46 @@ def print_file_info(file_name: Path) -> None:
     """
     Display file information for a file
     """
-    if check_file(file_name):
+    check_file_result = check_file(file_name)
+    if check_file_result[0]:
         print_file_data(FileInfo(file_name))
+    else:
+        print_error(check_file_result[1])
 
 
 def print_selected_info(files: list, selected: str) -> str:
-    """Display file information for a selected file."""
+    """
+    Display file information for a selected file.
+
+    Args:
+        files (list): list of files to display
+        selected (str): selected file number
+
+    Returns:
+        str: prompt to display, depending on input
+    """
+
+    # input should be an integer
     try:
         file_index = int(selected) - 1
     except ValueError:
         return "Invalid input, please enter a number or 'q'.\n"
 
+    # is the number valid?
     if file_index < 0 or file_index > len(files) - 1:
         message = f"The number {selected} is out of range.\n"
-        message += "Please enter a number between 1 and {len(files)}.\n"
+        message += f"Please enter a number between 1 and {len(files)}.\n"
         return message
 
     print_file_info(files[file_index])
+
+    # prompt to continue
     user_input = typer.prompt("Enter 'q' to quit, 'c' to continue")
     if user_input == "q":
         raise typer.Exit(code=NO_ERROR)
 
+    # continue with default prompt
     return "Select another file to examine.\n"
-
-
-def rename_list(
-    f_list: list, output_dir: Path = None, dryrun: bool = False
-) -> int:
-    """
-    Rename a list of file paths to internet-friendly names, display results
-    """
-    if dryrun:
-        typer.secho(
-            "Dry run is active, proposed changes won't be saved.",
-            fg=typer.colors.BRIGHT_WHITE,
-        )
-        start_label = "Proposing file name change from:"
-    else:
-        start_label = "Converting file name:"
-
-    for convert_count, f_name in enumerate(f_list, start=1):
-        typer.echo(start_label)
-        typer.secho(f"{f_name}", fg=typer.colors.CYAN)
-        typer.echo("  to:")
-        new_file_name = renamer.safe_renamer(f_name, output_dir, dryrun)
-        typer.secho(f"{new_file_name}", fg=typer.colors.BRIGHT_CYAN)
-
-    return convert_count
 
 
 def review_files(directory: Path, extension: str = None) -> None:
@@ -197,6 +159,31 @@ def review_files(directory: Path, extension: str = None) -> None:
             break
 
         full_prompt = print_selected_info(files, file_selector) + basic_prompt
+
+
+def rename_list(
+    f_list: list, output_dir: Path = None, dryrun: bool = False
+) -> int:
+    """
+    Rename a list of file paths to internet-friendly names, display results
+    """
+    if dryrun:
+        typer.secho(
+            "Dry run is active, proposed changes won't be saved.",
+            fg=typer.colors.BRIGHT_WHITE,
+        )
+        start_label = "Proposing file name change from:"
+    else:
+        start_label = "Converting file name:"
+
+    for convert_count, f_name in enumerate(f_list, start=1):
+        typer.echo(start_label)
+        typer.secho(f"{f_name}", fg=typer.colors.CYAN)
+        typer.echo("  to:")
+        new_file_name = safe_renamer(f_name, output_dir, dryrun)
+        typer.secho(f"{new_file_name}", fg=typer.colors.BRIGHT_CYAN)
+
+    return convert_count
 
 
 # CLI interface
@@ -222,7 +209,7 @@ def main(
 @app.command()
 def info() -> None:
     """Display platform information."""
-    typer.echo(plat_info.create_platform_report())
+    typer.echo(create_platform_report())
 
 
 @app.command()
@@ -234,18 +221,19 @@ def list(
         None, "--ext", "-x", help="Case-sensitive file extension."
     ),
 ) -> None:
-    """List files in a directory, or info for a file."""
+    """
+    List files in a directory, or info for a file
+    """
+    error_code = NO_FILE
     if path is None:
         path = Path.cwd()
     if path.is_file():
-        """list file information"""
+        # list file information for a single file
         print_file_info(path)
-    else:
-        """list directory contents"""
-        if not check_dir(path, "File list"):
-            raise typer.Exit(code=NO_FILE)
-
+    elif path.is_dir():
         review_files(path, ext)
+    else:
+        raise typer.Exit(code=error_code)
 
 
 @app.command()

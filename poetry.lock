@@ -700,7 +700,7 @@ files = [
 name = "tomli"
 version = "2.0.1"
 description = "A lil' TOML parser"
-category = "dev"
+category = "main"
 optional = false
 python-versions = ">=3.7"
 files = [
@@ -897,4 +897,4 @@ testing = ["big-O", "flake8 (<5)", "jaraco.functools", "jaraco.itertools", "more
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.9"
-content-hash = "4c4f7641480adb53c63555bc159aaf643e1652530cc5e7a1544dda4d3f5f9495"
+content-hash = "61fa7e6bcc34142eedcdf6a9237f493c2f4056d021156fa8fed93311ab60b65b"
