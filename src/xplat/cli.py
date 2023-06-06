@@ -161,8 +161,25 @@ def review_files(directory: Path, extension: str = None) -> None:
         full_prompt = print_selected_info(files, file_selector) + basic_prompt
 
 
+def rename_file(
+    file_name: str,
+    output_dir: Path = None,
+    dry_run: bool = False,
+    label: str = "",
+) -> None:
+    """
+    Renames a file with the given name to a new name
+    and outputs both names.
+    """
+    typer.echo(label)
+    typer.secho(f"{file_name}", fg=typer.colors.CYAN)
+    typer.echo("  to:")
+    new_file_name = safe_renamer(file_name, output_dir, dry_run)
+    typer.secho(f"{new_file_name}", fg=typer.colors.BRIGHT_CYAN)
+
+
 def rename_list(
-    f_list: list, output_dir: Path = None, dryrun: bool = False
+    files: list, output_dir: Path = None, dryrun: bool = False
 ) -> int:
     """
     Rename a list of file paths to internet-friendly names, display results
@@ -176,12 +193,8 @@ def rename_list(
     else:
         start_label = "Converting file name:"
 
-    for convert_count, f_name in enumerate(f_list, start=1):
-        typer.echo(start_label)
-        typer.secho(f"{f_name}", fg=typer.colors.CYAN)
-        typer.echo("  to:")
-        new_file_name = safe_renamer(f_name, output_dir, dryrun)
-        typer.secho(f"{new_file_name}", fg=typer.colors.BRIGHT_CYAN)
+    for convert_count, current_name in enumerate(files, start=1):
+        rename_file(current_name, output_dir, dryrun, start_label)
 
     return convert_count
 
