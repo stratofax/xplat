@@ -199,6 +199,34 @@ def rename_list(
     return convert_count
 
 
+def rename_files(
+    files: list,
+    files_found: int,
+    output_dir: Path,
+    ext: str,
+    dry_run: bool = False,
+) -> None:
+    """
+    Rename selected files
+    """
+    typer.echo("Selected files will be renamed and saved to:")
+    typer.secho(f"{output_dir}", fg=typer.colors.YELLOW)
+    plural = "s" if files_found > 1 else ""
+    confirm_rename = typer.prompt(
+        f"Rename {files_found} file{plural} of type '{ext}'? [y/n]",
+    )
+    # everything except y or Y cancels
+    if confirm_rename.lower() != "y":
+        typer.echo("Conversion cancelled.")
+        raise typer.Exit(code=NO_ERROR)
+
+    rename_total = rename_list(files, output_dir, dryrun=dry_run)
+    plural = "s" if rename_total > 1 else ""
+    typer.echo(
+        f"Processed {rename_total} file{plural} of {files_found} found."
+    )
+
+
 # CLI interface
 # sourcery skip: avoid-global-variables
 # module level variables are required by typer
@@ -293,22 +321,7 @@ def rename(
 
         output_dir = source_dir
 
-    typer.echo("Selected files will be renamed and saved to:")
-    typer.secho(f"{output_dir}", fg=typer.colors.YELLOW)
-    plural = "s" if files_found > 1 else ""
-    rename_files = typer.prompt(
-        f"Rename {files_found} file{plural} of type '{ext}'? [y/n]",
-    )
-    # everything except y or Y cancels
-    if rename_files.lower() != "y":
-        typer.echo("Conversion cancelled.")
-        raise typer.Exit(code=NO_ERROR)
-
-    rename_total = rename_list(files, output_dir, dryrun=dry_run)
-    plural = "s" if rename_total > 1 else ""
-    typer.echo(
-        f"Processed {rename_total} file{plural} of {files_found} found."
-    )
+    rename_files(files, files_found, output_dir, dry_run)
 
 
 if __name__ == "__main__":
