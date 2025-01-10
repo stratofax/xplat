@@ -11,7 +11,7 @@ abcdefghijklmnopqrstuvwxyz
 Special characters:
 safe  $-_.+
 reserved  ;/?:@&=
-extra  ,[] 
+extra  ,[]
 https://www.rfc-editor.org/rfc/rfc3986
 or
 https://www.ietf.org/rfc/rfc1738.txt

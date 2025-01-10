@@ -2,16 +2,20 @@
 Uses the typer package to implement sub-commands, command options
 and help text.
 Only CLI code should be in this module, input and output for the user.
-TODO: add logging
+TODO: add logging, verbosity
 """
-import subprocess
+
 from pathlib import Path
 from typing import Optional
 
 import typer
 
-from xplat import constants, list_files, pdf_to_img, plat_info, renamer
+from xplat import constants
+from xplat.info import create_platform_report
+from xplat.list import FileInfo, check_dir, check_file, create_file_list
+from xplat.rename import safe_renamer
 
+# numeric constants
 PROGRAM_NAME = constants.PROGRAM_NAME
 VERSION = constants.VERSION
 APP_HELP = constants.APP_HELP
@@ -20,68 +24,166 @@ NO_FILE = constants.NO_FILE
 BAD_REQUEST = constants.BAD_REQUEST
 
 
-def version_callback(value: bool) -> None:
-    """Display the version number and exit."""
-    if value:
+def version_callback(is_version_requested: bool) -> None:
+    """Display the version number and exit"""
+    if is_version_requested:
         typer.echo(f"{PROGRAM_NAME} version: {VERSION}")
-        raise typer.Exit
+        raise typer.Exit(code=NO_ERROR)
 
 
-def show_file_info(file_name: Path) -> None:
-    """Display file information for a file."""
-    file_size = list_files.format_bytes(file_name.stat().st_size)
-    typer.secho(f"{file_name}", fg=typer.colors.BRIGHT_GREEN)
-    typer.echo(f"  Size: {file_size}")
-    typer.echo(
-        f"  Modified: {list_files.format_timestamp(file_name.stat().st_mtime)}"
-    )
-    typer.echo(
-        f"  Created:  {list_files.format_timestamp(file_name.stat().st_ctime)}"
-    )
-    typer.echo(
-        f"  Accessed: {list_files.format_timestamp(file_name.stat().st_atime)}"
-    )
-
-
-def check_dir(dir_path: Path, dir_label: str = "") -> bool:
+def print_error(msg: str) -> None:
     """
-    Check if a directory exists, display error message if not.
-    dir_label is an optional label to describe
-    the purpose of the directory path.
+    Display an error message
     """
-    if dir_label != "":
-        dir_label = f"{dir_label}: "
-    if not dir_path.is_dir():
-        typer.secho(
-            f"{dir_label}'{dir_path}' is not a directory.",
-            fg=typer.colors.BRIGHT_WHITE,
-            bg=typer.colors.RED,
-        )
-    return dir_path.is_dir()
+    typer.secho(
+        msg,
+        fg=typer.colors.BRIGHT_WHITE,
+        bg=typer.colors.RED,
+    )
+
+
+def print_header(ext: str) -> None:
+    """
+    Print a header for the file list
+    """
+    if ext is not None:
+        list_label = f"Listing files with extension '.{ext}':"
+    else:
+        list_label = "Listing all files (no directories):"
+
+    label_border = "-" * len(list_label)
+    typer.echo(label_border)
+    typer.secho(
+        list_label,
+        fg=typer.colors.BRIGHT_YELLOW,
+    )
+    typer.echo(label_border)
 
 
 def print_files(files: list) -> int:
-    """Print a list of files, return the number of files found."""
-    # sourcery skip: remove-unnecessary-else, simplify-empty-collection-comparison, swap-if-else-branches
+    """
+    Print a list of files,
+    return the number of files found
+    """
+    # sourcery skip: simplify-empty-collection-comparison
     # testing for the empty list works reliably, unlike boolean test
     if files == []:
         file_count = 0
     else:
         for file_count, file_name in enumerate(files, start=1):
-            typer.secho(Path(file_name).name, fg=typer.colors.GREEN)
+            typer.secho(
+                f"{file_count}) {Path(file_name).name}", fg=typer.colors.GREEN
+            )
 
     # report the number of files found.
-    typer.secho(
-        f"Total files found = {file_count}", fg=typer.colors.BRIGHT_YELLOW
-    )
+    file_report = f"Total files found = {file_count}"
+    typer.echo("-" * len(file_report))
+    typer.secho(file_report, fg=typer.colors.BRIGHT_YELLOW)
+
     return file_count
 
 
+def print_file_data(file_info: FileInfo) -> None:
+    """
+    Print file properties in indented table format
+    """
+    typer.secho(f"{file_info.file_name}", fg=typer.colors.BRIGHT_GREEN)
+    typer.echo(f"  Size:     {file_info.size}")
+    typer.echo(f"  Created:  {file_info.created}")
+    typer.echo(f"  Modified: {file_info.modified}")
+    typer.echo(f"  Accessed: {file_info.accessed}")
+
+
+def print_file_info(file_name: Path) -> None:
+    """
+    Display file information for a file
+    """
+    check_file_result = check_file(file_name)
+    if check_file_result[0]:
+        print_file_data(FileInfo(file_name))
+    else:
+        print_error(check_file_result[1])
+
+
+def print_selected_info(files: list, selected: str) -> str:
+    """
+    Display file information for a selected file.
+
+    Args:
+        files (list): list of files to display
+        selected (str): selected file number
+
+    Returns:
+        str: prompt to display, depending on input
+    """
+
+    # input should be an integer
+    try:
+        file_index = int(selected) - 1
+    except ValueError:
+        return "Invalid input, please enter a number or 'q'.\n"
+
+    # is the number valid?
+    if file_index < 0 or file_index > len(files) - 1:
+        message = f"The number {selected} is out of range.\n"
+        message += f"Please enter a number between 1 and {len(files)}.\n"
+        return message
+
+    print_file_info(files[file_index])
+
+    # prompt to continue
+    user_input = typer.prompt("Enter 'q' to quit, 'c' to continue")
+    if user_input == "q":
+        raise typer.Exit(code=NO_ERROR)
+
+    # continue with default prompt
+    return "Select another file to examine.\n"
+
+
+def review_files(directory: Path, extension: str = None) -> None:
+    """
+    Displays a list of files and prompts for file selection
+    """
+    files = create_file_list(directory, extension)
+    basic_prompt = "Enter a number to show file info, or 'q' to quit"
+    full_prompt = basic_prompt
+
+    # repeat until the user quits
+    while True:
+        print_header(extension)
+        print_files(files)
+
+        file_selector = typer.prompt(full_prompt)
+
+        if file_selector == "q":
+            break
+
+        full_prompt = print_selected_info(files, file_selector) + basic_prompt
+
+
+def rename_file(
+    file_name: str,
+    output_dir: Path = None,
+    dry_run: bool = False,
+    label: str = "",
+) -> None:
+    """
+    Renames a file with the given name to a new name
+    and outputs both names.
+    """
+    typer.echo(label)
+    typer.secho(f"{file_name}", fg=typer.colors.CYAN)
+    typer.echo("  to:")
+    new_file_name = safe_renamer(file_name, output_dir, dry_run)
+    typer.secho(f"{new_file_name}", fg=typer.colors.BRIGHT_CYAN)
+
+
 def rename_list(
-    f_list: list, output_dir: Path = None, dryrun: bool = False
+    files: list, output_dir: Path = None, dryrun: bool = False
 ) -> int:
     """
-    Rename a list of file paths to internet-friendly names, display results"""
+    Rename a list of file paths to internet-friendly names, display results
+    """
     if dryrun:
         typer.secho(
             "Dry run is active, proposed changes won't be saved.",
@@ -90,72 +192,44 @@ def rename_list(
         start_label = "Proposing file name change from:"
     else:
         start_label = "Converting file name:"
-    for convert_count, f_name in enumerate(f_list, start=1):
-        typer.echo(start_label)
-        typer.secho(f"{f_name}", fg=typer.colors.CYAN)
-        typer.echo("  to:")
-        new_file_name = renamer.safe_renamer(f_name, output_dir, dryrun)
-        typer.secho(f"{new_file_name}", fg=typer.colors.BRIGHT_CYAN)
-    return convert_count
 
-
-def convert_pdfs(
-    f_list: list,
-    output_dir: Path = None,
-    image_ext: str = "png",
-    img_width: int = 512,
-    gray: bool = False,
-) -> int:
-    """Convert a list of PDF files to images, display results"""
-    for convert_count, f_name in enumerate(f_list, start=1):
-        typer.echo("Converting PDF file:")
-        typer.secho(f"{f_name}", fg=typer.colors.CYAN)
-        convert_results = pdf_to_img.pdf_to_img(
-            f_name,
-            output_dir,
-            format=image_ext,
-            width=img_width,
-            grayscale=gray,
-        )
-        typer.echo("  to:")
-        for result in convert_results:
-            typer.secho(f"{result}", fg=typer.colors.CYAN)
+    for convert_count, current_name in enumerate(files, start=1):
+        rename_file(current_name, output_dir, dryrun, start_label)
 
     return convert_count
 
 
-def convert_text(
-    full_file_name: str, output_dir: str = None, convert_ext: str = "html"
-) -> str:
+def rename_files(
+    files: list,
+    files_found: int,
+    output_dir: Path,
+    ext: str,
+    dry_run: bool = False,
+) -> None:
     """
-    Convert text file to specified file type with pandoc
+    Rename selected files
     """
-    if not Path(full_file_name).is_file():
-        typer.echo(f"ERROR: {full_file_name} is not a file", err=True)
-        return None
-    # set file type for glob
-    file_stem = Path(full_file_name).stem
-    if output_dir is None:
-        working_dir = Path(full_file_name).parent
-    else:
-        working_dir = Path(output_dir)
-    output_name = f"{working_dir}/{file_stem}.{convert_ext}"
-    convert_cmd = [
-        "pandoc",
-        "--wrap=none",
-        full_file_name,
-        "-o" f"{output_name}",
-    ]
-    convert_result = subprocess.run(convert_cmd)
-    if convert_result.returncode == 0:
-        return output_name
-    typer.echo(
-        f"Error {convert_result.returncode} converting {full_file_name} to {convert_ext}",
-        err=True,
+    typer.echo("Selected files will be renamed and saved to:")
+    typer.secho(f"{output_dir}", fg=typer.colors.YELLOW)
+    plural = "s" if files_found > 1 else ""
+    confirm_rename = typer.prompt(
+        f"Rename {files_found} file{plural} of type '{ext}'? [y/n]",
     )
-    return None
+    # everything except y or Y cancels
+    if confirm_rename.lower() != "y":
+        typer.echo("Conversion cancelled.")
+        raise typer.Exit(code=NO_ERROR)
+
+    rename_total = rename_list(files, output_dir, dryrun=dry_run)
+    plural = "s" if rename_total > 1 else ""
+    typer.echo(
+        f"Processed {rename_total} file{plural} of {files_found} found."
+    )
 
 
+# CLI interface
+# sourcery skip: avoid-global-variables
+# module level variables are required by typer
 app = typer.Typer(help=APP_HELP)
 
 
@@ -176,7 +250,7 @@ def main(
 @app.command()
 def info() -> None:
     """Display platform information."""
-    typer.echo(plat_info.create_platform_report())
+    typer.echo(create_platform_report())
 
 
 @app.command()
@@ -188,26 +262,23 @@ def list(
         None, "--ext", "-x", help="Case-sensitive file extension."
     ),
 ) -> None:
-    """List files in the specified or current directory."""
+    """
+    List files in a directory, or info for a file
+    """
+    error_code = NO_FILE
     if path is None:
         path = Path.cwd()
     if path.is_file():
-        """list file information"""
-        show_file_info(path)
+        # list file information for a single file
+        print_file_info(path)
+    elif path.is_dir():
+        review_files(path, ext)
     else:
-        """list directory contents"""
-        if not check_dir(path, "File list"):
-            raise typer.Exit(code=constants.NO_FILE)
-        if ext is not None:
-            typer.secho(
-                f"Listing files with extension '.{ext}':",
-                fg=typer.colors.BRIGHT_YELLOW,
-            )
-        print_files(list_files.create_file_list(path, ext))
+        raise typer.Exit(code=error_code)
 
 
 @app.command()
-def names(
+def rename(
     source_dir: Path = typer.Option(
         ...,
         help="Source directory containing the files to rename.",
@@ -220,15 +291,17 @@ def names(
         False, help="Only display (don't save) proposed name changes"
     ),
 ) -> None:
-    """Convert file names for cross-platform compatibility."""
+    """
+    Convert file names for cross-platform compatibility
+    """
     # use Typer to ensure we get a source directory
     if not check_dir(source_dir, "Source"):
-        raise typer.Exit(code=constants.NO_FILE)
+        raise typer.Exit(code=NO_FILE)
     # output directory is optional
     if output_dir is not None and not check_dir(output_dir, "Output"):
-        raise typer.Exit(code=constants.NO_FILE)
+        raise typer.Exit(code=NO_FILE)
 
-    files = list_files.create_file_list(source_dir, ext)
+    files = create_file_list(source_dir, ext)
     files_found = print_files(files)
     if files_found == 0:
         typer.secho(
@@ -239,169 +312,16 @@ def names(
 
     if output_dir is None:
         rename_existing = typer.prompt(
-            "No output directory specified. Rename files? [y/N]"
+            "No output directory specified. Rename files? [y/n]"
         )
         # everything except y or Y cancels
         if rename_existing.lower() != "y":
             typer.echo("File name conversion cancelled.")
             raise typer.Exit(code=NO_ERROR)
-        else:
-            output_dir = source_dir
 
-    typer.echo("Selected files will be renamed and saved to:")
-    typer.secho(f"{output_dir}", fg=typer.colors.YELLOW)
-    plural = "s" if files_found > 1 else ""
-    rename_files = typer.prompt(
-        f"Rename {files_found} file{plural} of type '{ext}'? [y/N]",
-    )
-    # everything except y or Y cancels
-    if rename_files.lower() != "y":
-        typer.echo("Conversion cancelled.")
-        raise typer.Exit(code=NO_ERROR)
-    else:
-        rename_total = rename_list(files, output_dir, dryrun=dry_run)
-        plural = "s" if rename_total > 1 else ""
-        typer.echo(
-            f"Processed {rename_total} file{plural} of {files_found} found."
-        )
+        output_dir = source_dir
 
-
-@app.command()
-def pdfs(
-    source_dir: Path = typer.Option(
-        ...,
-        help="Source directory containing the PDF files to rename.",
-    ),
-    output_dir: Path = typer.Option(
-        ..., help="Output directory to save image files."
-    ),
-    image_ext: str = typer.Option(
-        None, help="Image file extension [jpeg, png, tiff or ppm]"
-    ),
-    width: int = typer.Option(
-        None, help="Image width in pixels, skip for max width"
-    ),
-    full_color: bool = typer.Option(
-        True, help="Convert to color or grayscale"
-    ),
-) -> None:
-    """Convert PDF files to image files (formats: JPEG, PNG, TIFF or PPM)."""
-    # use Typer to ensure we get a source directory
-
-    if not check_dir(source_dir, "Source"):
-        raise typer.Exit(code=constants.NO_FILE)
-    # output directory is optional
-    if not check_dir(output_dir, "Output"):
-        raise typer.Exit(code=constants.NO_FILE)
-
-    if image_ext is None:
-        typer.secho("No image format specified; using default: png")
-        convert_format = "png"
-    else:
-        convert_format = image_ext.lower()
-        formats = ("jpeg", "png", "tiff", "ppm")
-        if convert_format not in formats:
-            typer.secho(
-                "Image format must be one of the following:",
-                fg=typer.colors.BRIGHT_YELLOW,
-            )
-            for ext in formats:
-                typer.echo(f"  {ext}")
-            raise typer.Exit(code=BAD_REQUEST)
-    grayscale = not full_color
-    typer.echo(f"Converting PDFs to '{convert_format}' format ...")
-    pdfs = list_files.create_file_list(source_dir, "pdf")
-    files_found = print_files(pdfs)
-    if files_found == 0:
-        typer.secho(
-            f"  No PDFs found in directory: {source_dir}",
-            fg=typer.colors.YELLOW,
-        )
-        raise typer.Exit(code=NO_FILE)
-
-    typer.echo("Selected PDFs will be converted and saved to:")
-    typer.secho(f"{output_dir}", fg=typer.colors.YELLOW)
-    plural = "s" if files_found > 1 else ""
-    pdfs_2_img = typer.prompt(
-        f"Convert {files_found} PDF file{plural} to images of type '{convert_format}'? [y/N]",
-    )
-    # everything except y or Y cancels
-    if pdfs_2_img.lower() != "y":
-        typer.echo("PDF conversion cancelled.")
-        raise typer.Exit(code=NO_ERROR)
-    else:
-        image_total = convert_pdfs(
-            pdfs,
-            output_dir,
-            convert_format,
-            img_width=width,
-            gray=grayscale,
-        )
-        plural = "s" if image_total > 1 else ""
-        typer.echo(
-            f"Processed {image_total} file{plural} of {files_found} found."
-        )
-
-
-@app.command()
-def text(
-    source_dir: Path = typer.Option(
-        ...,
-        help="Source directory containing the text files to rename.",
-    ),
-    output_dir: Path = typer.Option(
-        None, help="Output directory to save converted text files."
-    ),
-    source_ext: str = typer.Option(
-        "docx", help="Extension of source text files to convert."
-    ),
-    convert_ext: str = typer.Option(
-        "markdown", help="Extension of converted text files."
-    ),
-) -> None:
-    """Convert text files to a different text format."""
-    # use Typer to ensure we get a source directory
-    if not check_dir(source_dir, "Source"):
-        raise typer.Exit(code=constants.NO_FILE)
-    # output directory is optional
-    if output_dir is not None and not check_dir(output_dir, "Output"):
-        raise typer.Exit(code=constants.NO_FILE)
-
-    convert_from = source_ext.lower()
-    convert_to = convert_ext.lower()
-    typer.echo(f"Converting {convert_from} files to {convert_to} format ...")
-    text_files = list_files.create_file_list(source_dir, convert_from)
-    files_found = print_files(text_files)
-    if files_found == 0:
-        typer.secho(
-            f"  No {convert_from} files found in directory: {source_dir}",
-            fg=typer.colors.YELLOW,
-        )
-        raise typer.Exit(code=NO_FILE)
-
-    typer.echo(
-        f"Selected {convert_from} files will be converted and saved as {convert_to}."
-    )
-    plural = "s" if files_found > 1 else ""
-    confirm_convert = typer.prompt(
-        f"Convert {files_found} '{convert_from}' file{plural} to file{plural} of type '{convert_to}'? [y/N]",
-    )
-    # everything except y or Y cancels
-    if confirm_convert.lower() != "y":
-        typer.echo("Text conversion cancelled.")
-        raise typer.Exit(code=NO_ERROR)
-    else:
-        for text_total, file_name in enumerate(text_files, start=1):
-            typer.secho(f"Converting: {file_name} ...", fg=typer.colors.CYAN)
-            new_name = convert_text(
-                file_name, output_dir, convert_ext=convert_to
-            )
-            if new_name is not None:
-                typer.secho(f"to:         {new_name}", fg=typer.colors.CYAN)
-        plural = "s" if text_total > 1 else ""
-        typer.echo(
-            f"Processed {text_total} file{plural} of {files_found} found."
-        )
+    rename_files(files, files_found, output_dir, dry_run)
 
 
 if __name__ == "__main__":
