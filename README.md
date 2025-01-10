@@ -1,8 +1,22 @@
-# Xplat
+# xplat
+
+[![Coverage Status](https://coveralls.io/repos/github/stratofax/xplat/badge.svg?branch=release/candidate-01)](https://coveralls.io/github/stratofax/xplat?branch=release/candidate-01)
+
+(Coverage stats for the release/candidate-01 branch)
 
 ## Cross-platform Python tools for batch file management and conversion at the command line
 
-Created with Python 3.9, this package uses the [pathlib module, Object-oriented filesystem paths](https://docs.python.org/3/library/pathlib.html), introduced in Python 3.4
+If you have to work with lots of files on different computing platforms, `xplat` is here to help. Uploading files from your notebook to a web server? Use `xplat rename` to change the file names so they won't break your web browser. Want to know more about your computer or Python installation? Use `xplat info` for a detailed system report.
+
+Created for Python 3.9 or later, this package uses the [pathlib module, Object-oriented filesystem paths](https://docs.python.org/3/library/pathlib.html), introduced in Python 3.4, to work with files on all platforms.
+
+## xplat Features
+
+Designed from the start to work across platforms, `xplat` includes these features:
+
+* Extensive command-line help.
+* Tested on Mac, Linux, and Windows.
+* Works with individual files or directories.
 
 ## Getting Started
 
@@ -21,18 +35,23 @@ If the steps described above in the **Getting Started** section worked for you, 
 pytest
 ```
 
-If you find an error, please report it by tweeting @stratofax with the hastag `#xplatbug`. You can also tweet @stratofax if you have any questions or suggestions about this project -- just use the `xplat` hashtag. Please note that I won't reply to DMs.
+To see a code coverage report, enter:
+
+```bash
+pytest --cov-report term-missing --cov=src/
+```
+
+If you find an error, please report it by creating an issue on this repo.
 
 ## Subcommands
 
-The `xplat` utility offers several useful sub-commands (or, more simply, _commands_). Here's the latest list, from `xplat --help`
+The `xplat` utility offers several useful sub-commands (or, more simply, _commands_). Here's the current list, from `xplat --help`
 
 ```bash
 Commands:
-  info   Display platform information.
-  list   List files in the specified directory.
-  names  Convert names of multiple files for internet compatibility.
-  pdfs   Convert PDF files to image files (formats: JPEG, PNG, TIFF or PPM).
+  info    Display platform information.
+  list    List files in a directory, or info for a file.
+  rename  Convert file names for cross-platform compatibility.
 ```
 
 ### info
@@ -67,7 +86,9 @@ macOS Version:                 12.4
 
 List files in the specified directory. Especially useful to see which files you'll modify with any of the other conversion commands, since it uses the same file listing code as the other commands.
 
-Here are some samples:
+Also lists file information for individual files. Either provide the path to the file, or select a file from the list.
+
+Here are some examples:
 
 ```bash
 # list all the files (no directories) in your home directory
@@ -77,7 +98,7 @@ xplat list ~
 xplat list ~/Downloads/ --ext pdf
 ```
 
-## names
+## rename
 
 Convert names of multiple files for internet compatibility; specifically:
 
@@ -85,7 +106,9 @@ Convert names of multiple files for internet compatibility; specifically:
 * Replace all periods with underscores ("_").
 * Convert all characters to lower case.
 
-Here are some samples:
+You can either rename the files in place (in the same directory) or copy them to a different directory when you rename them.
+
+Here are some examples:
 
 ```bash
 # Use the "dry run" option to preview name conversion for all the files in the ~/Downloads directory
@@ -93,27 +116,6 @@ xplat names --source-dir ~/Downloads/ --dry-run
 
 # move and rename all the pdf files in ~/Downloads to ~/temp
 xplat names --source-dir ~/Downloads/ --output-dir ~/temp/ --ext pdf
-```
-
-### pdfs
-
-Convert PDF files to bitmap image files. Supported output formats:
-
-* JPEG
-* PNG
-* TIFF
-* PPM
-
-Here are some samples:
-
-```bash
-# convert all the pdfs in ~/temp to png files in ~/temp/png
-# full color images, 512 pixels wide
-xplat pdfs --source-dir ~/temp/ --output-dir ~/temp/png/ --image-ext png --full-color --width=512
-
-# convert all the pdfs in ~/temp to png files in ~/temp/png
-# black & white (grayscale) images, 512 pixels wide
-xplat pdfs --source-dir ~/temp/ --output-dir ~/temp/png/ --image-ext png --no-full-color --width=512
 ```
 
 ## FAQ

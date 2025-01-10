@@ -46,6 +46,7 @@ htmlcov/
 .cache
 nosetests.xml
 coverage.xml
+coverage.lcov
 *.cover
 *.py,cover
 .hypothesis/
@@ -134,3 +135,8 @@ dmypy.json
 
 # VSCode
 /.vscode/
+
+# Temp and swap
+*.swp
+*.tmp
+

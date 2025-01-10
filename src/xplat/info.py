@@ -22,7 +22,8 @@ def add_row(label: str, value: str, tab_stop: int = STD_COLUMN) -> str:
     return f"{label}: {padding} {value}\n"
 
 
-def add_list(two_column_list: list, tab_stop=WIDE_COLUMN) -> str:
+def add_list(two_column_list: list, tab_stop: int = WIDE_COLUMN) -> str:
+    """add a list of two-column rows at specified tab stop"""
     new_rows = ""
     for label, property in two_column_list:
         # check for empty strings
@@ -33,6 +34,9 @@ def add_list(two_column_list: list, tab_stop=WIDE_COLUMN) -> str:
 
 # create platform report
 def create_platform_report() -> str:
+    """
+    Create a report of platform information as a string for console output.
+    """
 
     platform_rpt = add_header("Platform")
 
@@ -65,7 +69,8 @@ def create_platform_report() -> str:
 
     # execute platform-specific code
     sys_name = platform.system()
-    if sys_name == "Linux":
+    # impossible to test this code on all platforms
+    if sys_name == "Linux":    # pragma: no cover
         platform_rpt += add_header("Linux")
         # libc_ver is a 2-element tuple
         libc_info = platform.libc_ver()
@@ -75,13 +80,13 @@ def create_platform_report() -> str:
         platform_rpt += add_row("libc Version",
                                 libc_info[1],
                                 tab_stop=WIDE_COLUMN)
-    elif sys_name == "Darwin":
+    elif sys_name == "Darwin":    # pragma: no cover
         platform_rpt += add_header("macOS")
         mac_ver = platform.mac_ver()
         platform_rpt += add_row("macOS Version",
                                 mac_ver[0],
                                 tab_stop=WIDE_COLUMN)
-    elif sys_name == "Windows":
+    elif sys_name == "Windows":   # pragma: no cover
         platform_rpt += add_header("Windows")
         win_ver = platform.win32_ver()
         iot = "Yes" if platform.win32_is_iot() else "No"
@@ -94,13 +99,14 @@ def create_platform_report() -> str:
             ["Windows IoT Edition", iot],
         ]
         platform_rpt += add_list(windows_info)
-    else:
+    else:   # pragma: no cover
         if sys_name == "":
             sys_name = NOT_FOUND
         platform_rpt += f"\nUnidentified system name: {sys_name}\n"
     return platform_rpt
 
 
-if __name__ == "__main__":
-    platform_report = create_platform_report()
-    print(f"{platform_report}")
+if __name__ == "__main__":   # pragma: no cover
+    """Run the module as a script."""
+    _platform_report = create_platform_report()
+    print(f"{_platform_report}")
