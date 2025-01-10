@@ -27,6 +27,24 @@ Designed from the start to work across platforms, `xplat` includes these feature
 5. Run `xplat --help` for a list of subcommands and options.
 6. (Optional) Run `xplat --install-completion` with the name of your shell (bash, zsh, fish, etc.) to enable tab completion.
 
+### System Dependencies
+
+Some features require additional system packages that aren't handled by Poetry:
+
+#### GUI Dependencies (for `xplat gui` command)
+
+- **Linux (Ubuntu/Debian)**: Install Tkinter
+  ```bash
+  sudo apt-get install python3-tk
+  ```
+
+- **macOS**: Tkinter is included with Python from python.org. If you're using Homebrew:
+  ```bash
+  brew install python-tk
+  ```
+
+- **Windows**: Tkinter is included with Python from python.org. No additional installation needed.
+
 ## Bugs and Testing
 
 If the steps described above in the **Getting Started** section worked for you, you'll also be able to run the `pytest` test suite. Simply enter:
