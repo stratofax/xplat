@@ -41,6 +41,12 @@ To see a code coverage report, enter:
 pytest --cov-report term-missing --cov=src/
 ```
 
+Or, without `poetry shell`:
+
+```bash
+poetry run pytest --cov-report term-missing --cov=src/
+```
+
 If you find an error, please report it by creating an issue on this repo.
 
 ## Subcommands
@@ -52,6 +58,7 @@ Commands:
   info    Display platform information.
   list    List files in a directory, or info for a file.
   rename  Convert file names for cross-platform compatibility.
+  gui     Launch the graphical user interface.
 ```
 
 ### info
@@ -116,6 +123,24 @@ xplat names --source-dir ~/Downloads/ --dry-run
 
 # move and rename all the pdf files in ~/Downloads to ~/temp
 xplat names --source-dir ~/Downloads/ --output-dir ~/temp/ --ext pdf
+```
+
+## gui
+
+Launch the graphical user interface for xplat. The GUI provides a user-friendly way to access xplat's features through a tabbed interface:
+
+* Info Tab: Display detailed system information with a refresh button
+* List Tab: (Coming soon) Browse and get information about files and directories
+* Rename Tab: (Coming soon) Rename files with a visual interface
+
+Here are some examples:
+
+```bash
+# Launch the GUI
+xplat gui
+
+# Using poetry
+poetry run xplat gui
 ```
 
 ## FAQ

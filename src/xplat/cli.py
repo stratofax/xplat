@@ -244,13 +244,20 @@ def main(
     ),
 ) -> None:
     """Empty function required for version callback"""
-    pass
 
 
 @app.command()
-def info() -> None:
+def info():
     """Display platform information."""
-    typer.echo(create_platform_report())
+    platform_report = create_platform_report()
+    typer.echo(platform_report)
+
+
+@app.command()
+def gui():
+    """Launch the graphical user interface."""
+    from xplat.gui import main as gui_main
+    gui_main()
 
 
 @app.command()
