@@ -102,20 +102,33 @@ xplat list ~/Downloads/ --ext pdf
 
 Convert names of multiple files for internet compatibility; specifically:
 
-* Replace spaces with underscores ("_").
-* Replace all periods with underscores ("_").
-* Convert all characters to lower case.
+* Replace spaces with underscores ("_")
+* Replace all periods with underscores ("_")
+* Convert all characters to lower case
 
 You can either rename the files in place (in the same directory) or copy them to a different directory when you rename them.
+
+Options:
+* `-s, --source-dir`: Source directory containing files to rename (required)
+* `-o, --output-dir`: Output directory to save renamed files
+* `-e, --ext`: Case-sensitive file extension filter
+* `-n, --dry-run`: Preview changes without modifying files
+* `-i, --interactive`: Prompt for confirmation before each rename
 
 Here are some examples:
 
 ```bash
-# Use the "dry run" option to preview name conversion for all the files in the ~/Downloads directory
-xplat names --source-dir ~/Downloads/ --dry-run
+# Use dry run to preview name conversion for all files in ~/Downloads
+xplat rename -s ~/Downloads -n
 
-# move and rename all the pdf files in ~/Downloads to ~/temp
-xplat names --source-dir ~/Downloads/ --output-dir ~/temp/ --ext pdf
+# Move and rename all PDF files from ~/Downloads to ~/temp
+xplat rename -s ~/Downloads -o ~/temp -e pdf
+
+# Rename files with interactive confirmation
+xplat rename -s ~/Photos -i
+
+# Preview renaming of JPG files only
+xplat rename -s ~/Photos -e jpg -n
 ```
 
 ## FAQ
@@ -124,11 +137,11 @@ Some questions and answers about the `xplat` utility.
 
 ### Why doesn't xplat do X?
 
-I've added the different features as I've needed them for my web development work. If you'd like to suggest a new feature, simply tweet @stratofax -- just use the `xplat` hashtag, and you can contact me this way if you have any questions or suggestions about this project. Please note that I won't reply to DMs.
+I've added the different features as I've needed them for my web development work. If you'd like to suggest a new feature, add an issue on this repo.
 
 New features that have a wide appeal, or work well when processing more than one file, will be considered before obscure features that you can already perform on a single file using an existing tool.
 
-If you really want to see a new feature, fork this repo, create a branch, and start coding! Even better, send me a tweet (@stratofax) with the hashtag `#xplat` and I'll open an issue for your new code.
+If you really want to see a new feature, fork this repo, create a branch, and start coding!
 
 ### I can already do this thing using another program on my favorite computer. Why would I want to use xplat?
 
