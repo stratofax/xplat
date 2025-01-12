@@ -293,21 +293,19 @@ def list(
 @app.command()
 def rename(
     source_dir: Path = typer.Option(
-        ..., help="Source directory containing the files to rename."
+        ..., "--source-dir", "-s", help="Source directory containing the files to rename."
     ),
     output_dir: Path = typer.Option(
-        None, help="Output directory to save renamed files.",
+        None, "--output-dir", "-o", help="Output directory to save renamed files.",
     ),
-    ext: str = typer.Option(None, help="Case-sensitive file extension."),
+    ext: str = typer.Option(
+        None, "--ext", "-e", help="Case-sensitive file extension.",
+    ),
     dry_run: bool = typer.Option(
-        False,
-        help="Only display (don't save) proposed name changes",
-        show_default=True,
+        False, "--dry-run", "-n", help="Only display (don't save) proposed name changes", show_default=True,
     ),
     interactive: bool = typer.Option(
-        False,
-        help="Prompt for confirmation before renaming",
-        show_default=True,
+        False, "--interactive", "-i", help="Prompt for confirmation before renaming", show_default=True,
     ),
 ) -> None:
     """Convert file names for cross-platform compatibility"""
