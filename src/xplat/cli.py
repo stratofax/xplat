@@ -13,7 +13,7 @@ import typer
 from xplat import constants
 from xplat.info import create_platform_report
 from xplat.list import FileInfo, check_dir, check_file, create_file_list
-from xplat.rename import safe_renamer
+from xplat.rename import rename_file, make_safe_path
 
 # numeric constants
 PROGRAM_NAME = constants.PROGRAM_NAME
@@ -161,8 +161,8 @@ def review_files(directory: Path, extension: str = None) -> None:
         full_prompt = print_selected_info(files, file_selector) + basic_prompt
 
 
-def rename_file(
-    file_name: str,
+def rename_file_with_output(
+    file_name: Path,
     output_dir: Path = None,
     dry_run: bool = False,
     label: str = "",
@@ -174,8 +174,8 @@ def rename_file(
     typer.echo(label)
     typer.secho(f"{file_name}", fg=typer.colors.CYAN)
     typer.echo("  to:")
-    new_file_name = safe_renamer(file_name, output_dir, dry_run)
-    typer.secho(f"{new_file_name}", fg=typer.colors.BRIGHT_CYAN)
+    new_path = rename_file(file_name, output_dir, dry_run)
+    typer.secho(f"{new_path}", fg=typer.colors.BRIGHT_CYAN)
 
 
 def rename_list(
@@ -194,7 +194,7 @@ def rename_list(
         start_label = "Converting file name:"
 
     for convert_count, current_name in enumerate(files, start=1):
-        rename_file(current_name, output_dir, dryrun, start_label)
+        rename_file_with_output(current_name, output_dir, dryrun, start_label)
 
     return convert_count
 
@@ -230,7 +230,7 @@ def rename_files(
 # CLI interface
 # sourcery skip: avoid-global-variables
 # module level variables are required by typer
-app = typer.Typer(help=APP_HELP)
+app = typer.Typer(help=constants.APP_HELP)
 
 
 @app.callback()
@@ -321,7 +321,7 @@ def rename(
 
         output_dir = source_dir
 
-    rename_files(files, files_found, output_dir, dry_run)
+    rename_files(files, files_found, output_dir, ext, dry_run)
 
 
 if __name__ == "__main__":

@@ -67,20 +67,21 @@ def make_safe_path(orig_path: Path, target_dir: Path = None) -> Path:
     return target_dir.joinpath(new_name) if target_dir else orig_path.with_name(new_name)
 
 
-def rename_file(orig_path: Path, target_dir: Path = None) -> Path:
+def rename_file(orig_path: Path, target_dir: Path = None, dry_run: bool = False) -> Path:
     """Rename file to be platform and web-friendly.
     
     Args:
         orig_path: Path to original file
         target_dir: Optional target directory for renamed file
+        dry_run: If True, only return the new path without performing rename
     
     Returns:
-        Path to renamed file
+        Path to renamed file (or would-be path if dry_run=True)
         
     Raises:
         FileNotFoundError: If original path is not a file
         NotADirectoryError: If target directory is specified but invalid
-        FileExistsError: If target path already exists
+        FileExistsError: If target path already exists (unless dry_run=True)
     """
     # Validate inputs
     if not orig_path.is_file():
@@ -91,10 +92,12 @@ def rename_file(orig_path: Path, target_dir: Path = None) -> Path:
     # Get new path
     new_path = make_safe_path(orig_path, target_dir)
     
-    # Check if target exists
-    if new_path.exists():
+    # Check if target exists (skip if dry_run)
+    if not dry_run and new_path.exists():
         raise FileExistsError(f"File already exists: {new_path}")
         
-    # Perform rename
-    orig_path.rename(new_path)
+    # Perform rename unless dry_run
+    if not dry_run:
+        orig_path.rename(new_path)
+        
     return new_path
