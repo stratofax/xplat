@@ -130,49 +130,85 @@ def test_print_files():
 
 
 def test_rename_list():
-    # Create sample files with unfriendly names
+    """Test the rename_list function with various modes"""
     with tempfile.TemporaryDirectory() as temp_dir:
         temp_dir = Path(temp_dir)
+        output_dir = temp_dir / "output"
+        output_dir.mkdir()
 
-        # Create list of file names
+        # Test dry-run mode first
         file_names = ["file with spaces.txt", "file#with#special#chars!.txt"]
-        new_names = []
+        test_files = []
+        for name in file_names:
+            file_path = temp_dir / name
+            file_path.write_text("test content")
+            test_files.append(file_path)
 
-        # Create the actual files in the temporary directory
-        for file_name in file_names:
-            file_path = temp_dir / file_name
-            with file_path.open("w") as f:
-                f.write("Sample content")
-            new_names.append(file_path)
+        convert_count = rename_list(test_files, output_dir, dryrun=True)
+        assert convert_count == 2
+        # Original files should still exist
+        for file_path in test_files:
+            assert file_path.exists()
+        # Output files should not exist
+        assert not (output_dir / "file_with_spaces.txt").exists()
+        assert not (output_dir / "filewithspecialchars.txt").exists()
 
-        # Test the function in dryrun mode
-        convert_count = rename_list(
-            new_names, output_dir=temp_dir, dryrun=True
-        )
-        assert convert_count == len(
-            new_names
-        ), "Incorrect number of files processed in dryrun mode."
+        # Now test non-interactive mode
+        convert_count = rename_list(test_files, output_dir)
+        assert convert_count == 2
+        # Check renamed files exist
+        assert (output_dir / "file_with_spaces.txt").exists()
+        assert (output_dir / "filewithspecialchars.txt").exists()
 
-        # Check that the original files are still present and unchanged
-        for file_path in new_names:
-            assert (
-                file_path.exists()
-            ), f"File {file_path} should not have \
-                                         been renamed in dryrun mode."
 
-        # Test the function without dryrun mode
-        convert_count = rename_list(
-            new_names, output_dir=temp_dir, dryrun=False
-        )
-        assert convert_count == len(
-            new_names
-        ), "Incorrect number of files processed in normal mode."
+def test_rename_command():
+    """Test the rename command with various options"""
+    runner = CliRunner()
+    with tempfile.TemporaryDirectory() as temp_dir:
+        temp_dir = Path(temp_dir)
+        output_dir = temp_dir / "output"
+        output_dir.mkdir()
 
-        # Check that the original files have been renamed
-        for file_path in new_names:
-            assert (
-                not file_path.exists()
-            ), f"File {file_path} should have been renamed."
+        # Create a test file
+        test_file = temp_dir / "Test File.txt"
+        test_file.write_text("test content")
+
+        # Test dry run mode
+        result = runner.invoke(app, [
+            "rename",
+            "--source-dir", str(temp_dir),
+            "--output-dir", str(output_dir),
+            "--dry-run"
+        ])
+        assert result.exit_code == 0
+        assert "DRY RUN" in result.stdout
+
+        # Test non-interactive mode (default)
+        result = runner.invoke(app, [
+            "rename",
+            "--source-dir", str(temp_dir),
+            "--output-dir", str(output_dir)
+        ])
+        assert result.exit_code == 0
+        assert (output_dir / "test_file.txt").exists()
+
+        # Test interactive mode with confirmation
+        result = runner.invoke(app, [
+            "rename",
+            "--source-dir", str(temp_dir),
+            "--output-dir", str(output_dir),
+            "--interactive"
+        ], input="y\n")
+        assert result.exit_code == 0
+
+        # Test interactive mode with cancellation
+        result = runner.invoke(app, [
+            "rename",
+            "--source-dir", str(temp_dir),
+            "--output-dir", str(output_dir),
+            "--interactive"
+        ], input="n\n")
+        assert result.exit_code == 1
 
 
 def test_print_selected_info(monkeypatch):
