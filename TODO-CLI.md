@@ -23,3 +23,4 @@ Updates to the CLI interface, by module.
 - [ ] Use the current directory if no source directory is specified (turn on Interactive mode to confirm)
 - [ ] Support conversion of a single file
 - [ ] Keep hyphens ("-") in file names
+- [ ] Remove leading, trailing spaces from file names
