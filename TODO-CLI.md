@@ -21,3 +21,5 @@ Updates to the CLI interface, by module.
 
 - [ ] Make the source directory the default (no option flag required)
 - [ ] Use the current directory if no source directory is specified (turn on Interactive mode to confirm)
+- [ ] Support conversion of a single file
+- [ ] Keep hyphens ("-") in file names
