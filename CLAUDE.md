@@ -30,12 +30,13 @@ Xplat is a cross-platform Python CLI tool for batch file management and conversi
 ## Architecture
 
 ### Core Structure  
-- **CLI Layer** (`src/xplat/cli.py`): Refactored Typer-based interface with improved modularity
+- **CLI Layer** (`src/xplat/cli.py`): Refactored Typer-based interface with enhanced options and interactive mode
 - **Business Logic Modules**:
   - `list.py` - File discovery, listing utilities, and FileInfo class
-  - `rename.py` - File renaming for cross-platform compatibility  
+  - `rename.py` - Enhanced file renaming with `rename_file()`, `make_safe_path()`, and `safe_stem()` functions
   - `info.py` - Platform information reporting
 - **Configuration** (`constants.py`): Dynamic version reading from pyproject.toml, error codes, program metadata
+- **Development Planning** (`TODO-CLI.md`): Planned improvements and feature roadmap
 
 ### Command Architecture
 The CLI has been refactored with improved patterns:
@@ -54,13 +55,20 @@ The CLI has been refactored with improved patterns:
 ### File Processing Patterns
 - All file operations use pathlib.Path objects
 - File filtering by extension is case-sensitive
-- Batch operations include user confirmation prompts
-- Dry-run capabilities for preview before execution
+- Enhanced dry-run output with detailed formatting
+- Interactive mode with per-file confirmation
+- Improved error handling with proper exceptions (FileNotFoundError, FileExistsError)
+- Smart filename transformation: spaces→delimiters, dots→underscores, lowercase normalization
 
 ### Available Commands
 - `info` - Platform and Python environment information
 - `list` - Interactive directory listing with file selection and detailed info display
-- `rename` - Batch file renaming for cross-platform compatibility (spaces→underscores, lowercase)
+- `rename` - Enhanced batch file renaming with multiple options:
+  - `-s/--source-dir`: Source directory (required)
+  - `-o/--output-dir`: Output directory (optional)
+  - `-e/--ext`: File extension filter (optional)
+  - `-n/--dry-run`: Preview changes without modifying files
+  - `-i/--interactive`: Interactive confirmation mode
 
 ## Code Style
 - Follows Sourcery.yaml rules (no wildcard imports, avoid staticmethod)

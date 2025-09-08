@@ -21,7 +21,10 @@ Designed from the start to work across platforms, `xplat` includes these feature
 ## Getting Started
 
 1. Create a fork of this repo on your computer.
-2. Ensure that `poetry` is installed on your computer: `poetry --version`
+2. Install Poetry if you haven't already:
+   - Visit https://python-poetry.org/docs/#installation
+   - Or use: `curl -sSL https://install.python-poetry.org | python3 -`
+   - Verify with: `poetry --version`
 3. In the root directory of this project, run `poetry install` to ensure you have all the required packages
 4. Start the virtual environment: `poetry shell`
 5. Run `xplat --help` for a list of subcommands and options.
