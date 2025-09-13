@@ -44,18 +44,20 @@ jobs:
           python-version: ${{ matrix.python-version }}
           # poetry cache required to use poetry
           cache: "poetry"
-      # install flake8 for testing
-      - run: poetry add flake8
       - run: poetry install
       - run: poetry run pytest --cov=./ --cov-report=lcov tests/
-      # - run: poetry run pytest
 
-      - name: lint with flake8
+      - name: Code quality checks
         run: |
-          # stop the build if there are Python syntax errors or undefined names
-          poetry run flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
-          # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
-          poetry run flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
+          # Run ruff for linting and formatting checks
+          poetry run ruff check . --output-format=github
+          poetry run ruff format --check .
+          # Run mypy for type checking
+          poetry run mypy .
+          # Run bandit for security checks
+          poetry run bandit -r src/
+          # Run safety for dependency vulnerabilities
+          poetry run safety check
       - name: Coveralls GitHub Action
         uses: coverallsapp/github-action@v1
         with:

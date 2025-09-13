@@ -1,7 +1,8 @@
 """Avoid using magic numbers with these handy constants
-   Use the same values in tests, function returns.
-   Uses errno values: https://docs.python.org/3/library/errno.html
+Use the same values in tests, function returns.
+Uses errno values: https://docs.python.org/3/library/errno.html
 """
+
 import errno
 
 try:

@@ -32,19 +32,54 @@ Designed from the start to work across platforms, `xplat` includes these feature
 
 Note: if you don't want to invoke the poetry virtual environment using `poetry shell`, you can simply prefix your commands with `poetry run`. For example, enter `poetry run xplat --help`.
 
-## Bugs and Testing
+## Development and Testing
 
-If the steps described above in the **Getting Started** section worked for you, you'll also be able to run the `pytest` test suite. Simply enter:
+### Running Tests
+
+If the steps described above in the **Getting Started** section worked for you, you'll also be able to run the `pytest` test suite:
 
 ```bash
 pytest
 ```
 
-To see a code coverage report, enter:
+To see a code coverage report:
 
 ```bash
 pytest --cov-report term-missing --cov=src/
 ```
+
+### Code Quality
+
+This project uses modern Python tooling for code quality:
+
+```bash
+# Lint and format code (replaces flake8 + isort)
+poetry run ruff check .
+poetry run ruff format .
+
+# Type checking
+poetry run mypy .
+
+# Security scanning
+poetry run bandit -r src/
+poetry run safety check
+```
+
+### Pre-commit Hooks (Recommended)
+
+Set up automated code quality checks before each commit:
+
+```bash
+# Install pre-commit hooks
+poetry run pre-commit install
+
+# Run all checks manually
+poetry run pre-commit run --all-files
+```
+
+Once installed, the hooks will automatically run ruff, mypy, bandit, and other quality checks before each commit.
+
+### Reporting Issues
 
 If you find an error, please report it by creating an issue on this repo.
 

@@ -16,8 +16,20 @@ Xplat is a cross-platform Python CLI tool for batch file management and conversi
 - `pytest` - Run test suite
 - `pytest --cov-report term-missing --cov=src/` - Run tests with coverage report
 - `poetry run pytest --cov=./ --cov-report=lcov tests/` - Run tests with lcov coverage for CI
-- `poetry run flake8 .` - Run linting (syntax errors and undefined names)
-- `poetry run flake8 . --exit-zero --max-complexity=10 --max-line-length=127` - Full linting with warnings
+
+### Code Quality and Linting
+- `poetry run ruff check .` - Fast linting with ruff (replaces flake8 + isort)
+- `poetry run ruff format .` - Format code with ruff (alternative to black)
+- `poetry run ruff check . --fix` - Auto-fix linting issues
+- `poetry run black .` - Format code with black
+- `poetry run mypy .` - Type checking
+- `poetry run bandit -r src/` - Security linting
+- `poetry run safety check` - Check dependencies for vulnerabilities
+
+### Pre-commit Hooks
+- `poetry run pre-commit install` - Install pre-commit hooks
+- `poetry run pre-commit run --all-files` - Run all hooks on all files
+- `poetry run pre-commit autoupdate` - Update hook versions
 
 ### Running the Application
 - `xplat --help` - Show available commands after installation
@@ -27,9 +39,15 @@ Xplat is a cross-platform Python CLI tool for batch file management and conversi
 - `pytest tests/test_specific_module.py` - Run specific test file
 - `pytest tests/test_specific_module.py::test_function_name` - Run specific test
 
+### Development Workflow
+1. **Initial Setup**: `poetry install && poetry run pre-commit install`
+2. **Daily Development**: Pre-commit hooks run automatically on commit
+3. **Manual Quality Check**: `poetry run pre-commit run --all-files`
+4. **Before Push**: `pytest && poetry run ruff check . && poetry run mypy .`
+
 ## Architecture
 
-### Core Structure  
+### Core Structure
 - **CLI Layer** (`src/xplat/cli.py`): Refactored Typer-based interface with enhanced options and interactive mode
 - **Business Logic Modules**:
   - `list.py` - File discovery, listing utilities, and FileInfo class
@@ -52,6 +70,14 @@ The CLI has been refactored with improved patterns:
 - **colorama**: Cross-platform colored terminal output
 - **tomli/tomllib**: TOML parsing for dynamic version reading
 
+### Development Dependencies
+- **Ruff**: Fast Python linter (replaces flake8, isort, and more)
+- **Black**: Code formatter for consistent styling
+- **MyPy**: Static type checker with strict mode
+- **Bandit**: Security linter for common vulnerabilities
+- **Safety**: Dependency vulnerability scanner
+- **Pre-commit**: Git hook framework for automated quality checks
+
 ### File Processing Patterns
 - All file operations use pathlib.Path objects
 - File filtering by extension is case-sensitive
@@ -70,8 +96,29 @@ The CLI has been refactored with improved patterns:
   - `-n/--dry-run`: Preview changes without modifying files
   - `-i/--interactive`: Interactive confirmation mode
 
-## Code Style
-- Follows Sourcery.yaml rules (no wildcard imports, avoid staticmethod)
-- Uses errno constants for exit codes
+## Code Style and Quality
+- **Ruff**: Primary linting tool covering style, imports, naming conventions, and complexity
+- **Black**: Code formatting for consistent style
+- **MyPy**: Static type checking with strict mode
+- **Bandit**: Security linting for common vulnerabilities
+- **Safety**: Dependency vulnerability scanning
+- **Pre-commit hooks**: Automated quality checks before commits
+
+### Style Guidelines
+- Snake case for functions and variables
+- Upper camel case for classes
+- No wildcard imports (enforced by ruff)
+- Absolute imports only (enforced by ruff)
+- Type hints throughout codebase (enforced by mypy)
+- Max line length: 127 characters
+- Max function complexity: 10 (McCabe)
 - Descriptive error messages with colored output
-- Type hints throughout codebase
+
+### Migration from Sourcery
+This project has migrated from Sourcery to Ruff for code quality. The transition provides:
+- **10-100x faster** linting performance
+- **More comprehensive** rule coverage
+- **Better integration** with modern Python tooling
+- **Actively maintained** by the Astral team
+
+All previous Sourcery rules have been mapped to equivalent or better Ruff rules in the `[tool.ruff]` configuration.

@@ -1,4 +1,4 @@
-""" The Command Line Interface (CLI) code for xplat
+"""The Command Line Interface (CLI) code for xplat
 Uses the typer package to implement sub-commands, command options
 and help text.
 Only CLI code should be in this module, input and output for the user.
@@ -12,8 +12,8 @@ import typer
 
 from xplat import constants
 from xplat.info import create_platform_report
-from xplat.list import FileInfo, check_dir, check_file, create_file_list
-from xplat.rename import rename_file, make_safe_path
+from xplat.list import FileInfo, check_file, create_file_list
+from xplat.rename import rename_file
 
 # numeric constants
 PROGRAM_NAME = constants.PROGRAM_NAME
@@ -71,9 +71,7 @@ def print_files(files: list) -> int:
         file_count = 0
     else:
         for file_count, file_name in enumerate(files, start=1):
-            typer.secho(
-                f"{file_count}) {Path(file_name).name}", fg=typer.colors.GREEN
-            )
+            typer.secho(f"{file_count}) {Path(file_name).name}", fg=typer.colors.GREEN)
 
     # report the number of files found.
     file_report = f"Total files found = {file_count}"
@@ -188,7 +186,7 @@ def rename_list(
     Rename files in list, optionally to output directory
     """
     convert_count = 0
-    
+
     if dryrun:
         typer.secho("DRY RUN - No files will be changed", fg=typer.colors.YELLOW)
         typer.echo("")
@@ -207,7 +205,7 @@ def rename_list(
         else:
             typer.echo("Files would be renamed in place")
         return convert_count
-        
+
     return convert_count
 
 
@@ -235,9 +233,7 @@ def rename_files(
 
     rename_total = rename_list(files, output_dir, dryrun=dry_run)
     plural = "s" if rename_total > 1 else ""
-    typer.echo(
-        f"Processed {rename_total} file{plural} of {files_found} found."
-    )
+    typer.echo(f"Processed {rename_total} file{plural} of {files_found} found.")
 
 
 # CLI interface
@@ -271,9 +267,7 @@ def list(
     path: Optional[Path] = typer.Argument(
         None, help="Directory to list files from (current if none)."
     ),
-    ext: str = typer.Option(
-        None, "--ext", "-x", help="Case-sensitive file extension."
-    ),
+    ext: str = typer.Option(None, "--ext", "-x", help="Case-sensitive file extension."),
 ) -> None:
     """
     List files in a directory, or info for a file
@@ -293,19 +287,36 @@ def list(
 @app.command()
 def rename(
     source_dir: Path = typer.Option(
-        ..., "--source-dir", "-s", help="Source directory containing the files to rename."
+        ...,
+        "--source-dir",
+        "-s",
+        help="Source directory containing the files to rename.",
     ),
     output_dir: Path = typer.Option(
-        None, "--output-dir", "-o", help="Output directory to save renamed files.",
+        None,
+        "--output-dir",
+        "-o",
+        help="Output directory to save renamed files.",
     ),
     ext: str = typer.Option(
-        None, "--ext", "-e", help="Case-sensitive file extension.",
+        None,
+        "--ext",
+        "-e",
+        help="Case-sensitive file extension.",
     ),
     dry_run: bool = typer.Option(
-        False, "--dry-run", "-n", help="Only display (don't save) proposed name changes", show_default=True,
+        False,
+        "--dry-run",
+        "-n",
+        help="Only display (don't save) proposed name changes",
+        show_default=True,
     ),
     interactive: bool = typer.Option(
-        False, "--interactive", "-i", help="Prompt for confirmation before renaming", show_default=True,
+        False,
+        "--interactive",
+        "-i",
+        help="Prompt for confirmation before renaming",
+        show_default=True,
     ),
 ) -> None:
     """Convert file names for cross-platform compatibility"""
@@ -350,11 +361,9 @@ def rename(
 
         # confirm rename
         if output_dir is not None:
-            typer.echo(f"Selected files will be renamed and saved to:")
+            typer.echo("Selected files will be renamed and saved to:")
             typer.echo(f"{output_dir}")
-            if not typer.confirm(
-                f"Rename {files_found} files of type '{ext}'?"
-            ):
+            if not typer.confirm(f"Rename {files_found} files of type '{ext}'?"):
                 raise typer.Abort()
         else:
             if not typer.confirm("No output directory specified. Rename files?"):

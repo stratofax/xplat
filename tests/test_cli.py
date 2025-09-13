@@ -3,6 +3,7 @@ Tests for xplat.cli. Testing here is preferred as the tests
 at this level are effectively integration tests, but also
 are unit tests for the dependent modules.
 """
+
 import tempfile
 from pathlib import Path
 
@@ -174,40 +175,56 @@ def test_rename_command():
         test_file.write_text("test content")
 
         # Test dry run mode
-        result = runner.invoke(app, [
-            "rename",
-            "--source-dir", str(temp_dir),
-            "--output-dir", str(output_dir),
-            "--dry-run"
-        ])
+        result = runner.invoke(
+            app,
+            [
+                "rename",
+                "--source-dir",
+                str(temp_dir),
+                "--output-dir",
+                str(output_dir),
+                "--dry-run",
+            ],
+        )
         assert result.exit_code == 0
         assert "DRY RUN" in result.stdout
 
         # Test non-interactive mode (default)
-        result = runner.invoke(app, [
-            "rename",
-            "--source-dir", str(temp_dir),
-            "--output-dir", str(output_dir)
-        ])
+        result = runner.invoke(
+            app,
+            ["rename", "--source-dir", str(temp_dir), "--output-dir", str(output_dir)],
+        )
         assert result.exit_code == 0
         assert (output_dir / "test_file.txt").exists()
 
         # Test interactive mode with confirmation
-        result = runner.invoke(app, [
-            "rename",
-            "--source-dir", str(temp_dir),
-            "--output-dir", str(output_dir),
-            "--interactive"
-        ], input="y\n")
+        result = runner.invoke(
+            app,
+            [
+                "rename",
+                "--source-dir",
+                str(temp_dir),
+                "--output-dir",
+                str(output_dir),
+                "--interactive",
+            ],
+            input="y\n",
+        )
         assert result.exit_code == 0
 
         # Test interactive mode with cancellation
-        result = runner.invoke(app, [
-            "rename",
-            "--source-dir", str(temp_dir),
-            "--output-dir", str(output_dir),
-            "--interactive"
-        ], input="n\n")
+        result = runner.invoke(
+            app,
+            [
+                "rename",
+                "--source-dir",
+                str(temp_dir),
+                "--output-dir",
+                str(output_dir),
+                "--interactive",
+            ],
+            input="n\n",
+        )
         assert result.exit_code == 1
 
 
@@ -226,9 +243,7 @@ def test_print_selected_info(monkeypatch):
     file_selector = "5"
     result = print_selected_info(files, file_selector)
     expected_result = f"The number {file_selector} is out of range."
-    assert (
-        expected_result in result
-    ), "Incorrect error message for out-of-range input."
+    assert expected_result in result, "Incorrect error message for out-of-range input."
 
     # The files in the files list are not real files
     # Test for non-existent path, user choosing to continue

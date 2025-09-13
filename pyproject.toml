@@ -6,11 +6,11 @@ authors = ["Neil Johnson <neil@cadent.com>"]
 packages = [{ include = "xplat", from = "src" }]
 
 [tool.poetry.dependencies]
-python = "^3.9"
+python = "^3.12"
 colorama = "^0.4.4"
 optimize-images = "^1.5.0"
 pdf2image = "^1.16.0"
-typer = "^0.4.1"
+typer = "^0.12.0"
 shellingham = "^1.4.0"
 importlib-resources = "^5.12.0"
 tomli = "^2.0.1"
@@ -24,6 +24,10 @@ flake8 = "^7.1.1"
 isort = "^5.12.0"
 mypy = "^1.0.1"
 pylint = "^2.16.2"
+ruff = "^0.6.0"
+pre-commit = "^3.8.0"
+bandit = "^1.7.0"
+safety = "^1.10.3"
 
 [tool.poetry.group.test.dependencies]
 pytest = "^7.2.1"
@@ -32,3 +36,39 @@ pytest-cov = "^4.0.0"
 [build-system]
 requires = ["poetry-core>=1.0.0"]
 build-backend = "poetry.core.masonry.api"
+
+[tool.ruff]
+target-version = "py39"
+line-length = 127
+
+[tool.ruff.lint]
+select = [
+    "E",      # pycodestyle errors
+    "W",      # pycodestyle warnings
+    "F",      # pyflakes
+    "I",      # isort
+    "N",      # pep8-naming
+    "UP",     # pyupgrade
+    "B",      # flake8-bugbear
+    "C4",     # flake8-comprehensions
+    "SIM",    # flake8-simplify
+    "TCH",    # flake8-type-checking
+    "PTH",    # flake8-use-pathlib
+    "RUF",    # ruff-specific rules
+]
+ignore = [
+    "E501",   # line too long (handled by black)
+]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/*" = ["PLR2004"]  # magic values in tests are ok
+
+[tool.ruff.lint.isort]
+known-first-party = ["xplat"]
+
+[tool.ruff.lint.mccabe]
+max-complexity = 10
+
+[tool.bandit]
+exclude_dirs = ["tests"]
+skips = ["B101"]  # Skip assert_used test

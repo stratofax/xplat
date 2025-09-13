@@ -9,8 +9,9 @@ STD_COLUMN = 14
 WIDE_COLUMN = 28
 
 
-def add_header(label: str, tab_stop: int = WIDE_COLUMN,
-               indent: int = 2, char: str = "-") -> str:
+def add_header(
+    label: str, tab_stop: int = WIDE_COLUMN, indent: int = 2, char: str = "-"
+) -> str:
     """Add a header with suffix text and line decorations"""
     padding = char * (tab_stop - len(label))
     return f"\n{char * indent} {label} Information {padding}\n"
@@ -51,7 +52,7 @@ def create_platform_report() -> str:
     # tuple of the named tuple labels
     sys_labels = sys_info._fields
     # zip the two tuples together, title-case the name
-    for (label, value) in zip(sys_labels, sys_info):
+    for label, value in zip(sys_labels, sys_info):
         platform_rpt += add_row(label.title(), value)
 
     # get python executable info
@@ -70,23 +71,17 @@ def create_platform_report() -> str:
     # execute platform-specific code
     sys_name = platform.system()
     # impossible to test this code on all platforms
-    if sys_name == "Linux":    # pragma: no cover
+    if sys_name == "Linux":  # pragma: no cover
         platform_rpt += add_header("Linux")
         # libc_ver is a 2-element tuple
         libc_info = platform.libc_ver()
-        platform_rpt += add_row("libc Library",
-                                libc_info[0],
-                                tab_stop=WIDE_COLUMN)
-        platform_rpt += add_row("libc Version",
-                                libc_info[1],
-                                tab_stop=WIDE_COLUMN)
-    elif sys_name == "Darwin":    # pragma: no cover
+        platform_rpt += add_row("libc Library", libc_info[0], tab_stop=WIDE_COLUMN)
+        platform_rpt += add_row("libc Version", libc_info[1], tab_stop=WIDE_COLUMN)
+    elif sys_name == "Darwin":  # pragma: no cover
         platform_rpt += add_header("macOS")
         mac_ver = platform.mac_ver()
-        platform_rpt += add_row("macOS Version",
-                                mac_ver[0],
-                                tab_stop=WIDE_COLUMN)
-    elif sys_name == "Windows":   # pragma: no cover
+        platform_rpt += add_row("macOS Version", mac_ver[0], tab_stop=WIDE_COLUMN)
+    elif sys_name == "Windows":  # pragma: no cover
         platform_rpt += add_header("Windows")
         win_ver = platform.win32_ver()
         iot = "Yes" if platform.win32_is_iot() else "No"
@@ -99,14 +94,14 @@ def create_platform_report() -> str:
             ["Windows IoT Edition", iot],
         ]
         platform_rpt += add_list(windows_info)
-    else:   # pragma: no cover
+    else:  # pragma: no cover
         if sys_name == "":
             sys_name = NOT_FOUND
         platform_rpt += f"\nUnidentified system name: {sys_name}\n"
     return platform_rpt
 
 
-if __name__ == "__main__":   # pragma: no cover
+if __name__ == "__main__":  # pragma: no cover
     """Run the module as a script."""
     _platform_report = create_platform_report()
     print(f"{_platform_report}")
