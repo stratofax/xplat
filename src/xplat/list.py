@@ -55,7 +55,7 @@ def check_file(file_name: Path) -> tuple:
     return file_exist, error_msg
 
 
-def create_file_list(dir_path: Path, file_glob: str = None) -> list:
+def create_file_list(dir_path: Path, file_glob: Optional[str] = None) -> list:
     """Create a list of files in a directory, return the sorted list."""
     if file_glob is None:
         return sorted(dir_path.glob("*.*"))

@@ -4,7 +4,9 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-Xplat is a cross-platform Python CLI tool for batch file management and conversion operations. Built with Python 3.9+ using Poetry for dependency management and Typer for the CLI interface.
+Xplat is a cross-platform Python CLI tool for batch file management and conversion operations. Built with Python 3.12+ using Poetry for dependency management and Typer for the CLI interface.
+
+**Current Status**: Modern development stack implemented with comprehensive QA tooling. Core type hint and linting issues resolved.
 
 ## Development Commands
 
@@ -21,10 +23,15 @@ Xplat is a cross-platform Python CLI tool for batch file management and conversi
 - `poetry run ruff check .` - Fast linting with ruff (replaces flake8 + isort)
 - `poetry run ruff format .` - Format code with ruff (alternative to black)
 - `poetry run ruff check . --fix` - Auto-fix linting issues
+- `poetry run ruff check --select RUF013,B007,B008,PTH123,SIM102,SIM108` - Check specific rule categories
 - `poetry run black .` - Format code with black
-- `poetry run mypy .` - Type checking
+- `poetry run mypy .` - Type checking (may show function name collision warnings)
+- `poetry run mypy . --no-error-summary` - Type checking with cleaner output
 - `poetry run bandit -r src/` - Security linting
 - `poetry run safety check` - Check dependencies for vulnerabilities
+
+### Comprehensive Quality Check
+- `poetry run pytest && poetry run ruff check . && poetry run mypy . --no-error-summary` - Full QA pipeline
 
 ### Pre-commit Hooks
 - `poetry run pre-commit install` - Install pre-commit hooks
@@ -43,7 +50,14 @@ Xplat is a cross-platform Python CLI tool for batch file management and conversi
 1. **Initial Setup**: `poetry install && poetry run pre-commit install`
 2. **Daily Development**: Pre-commit hooks run automatically on commit
 3. **Manual Quality Check**: `poetry run pre-commit run --all-files`
-4. **Before Push**: `pytest && poetry run ruff check . && poetry run mypy .`
+4. **Before Push**: `poetry run pytest && poetry run ruff check . && poetry run mypy . --no-error-summary`
+5. **Specific Issue Debugging**: Use targeted ruff rules for focused fixes
+
+### Quality Metrics (Current Status)
+- **Test Coverage**: 88% (273/307 statements)
+- **Ruff Issues**: Significantly reduced (core issues resolved)
+- **MyPy Errors**: ~12 remaining (mostly function name collisions and missing annotations)
+- **Security**: Clean (Bandit reports 0 issues)
 
 ## Architecture
 

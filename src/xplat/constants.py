@@ -4,6 +4,7 @@ Uses errno values: https://docs.python.org/3/library/errno.html
 """
 
 import errno
+from pathlib import Path
 
 try:
     import tomllib
@@ -12,7 +13,7 @@ except ModuleNotFoundError:
 
 
 # read pyproject.toml and store the version number
-with open("pyproject.toml", mode="rb") as pyproject:
+with Path("pyproject.toml").open(mode="rb") as pyproject:
     _data = tomllib.load(pyproject)
     _version = _data["tool"]["poetry"]["version"]
 

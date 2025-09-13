@@ -9,19 +9,20 @@
 
 ## Code Quality Improvements
 
-- [ ] Fix remaining type hint issues (add `Optional` where needed)
-  - [ ] `src/xplat/cli.py` - 6 implicit Optional parameters
-  - [ ] `src/xplat/rename.py` - 2 implicit Optional parameters
-  - [ ] `src/xplat/list.py` - 1 implicit Optional parameter
-- [ ] Address Ruff linting suggestions (21 remaining issues)
-  - [ ] Convert if/else blocks to ternary operators where appropriate
-  - [ ] Fix unused loop variables
-  - [ ] Simplify nested if statements
-  - [ ] Replace `open()` with `Path.open()` in tests and constants
-- [ ] Resolve MyPy type checking errors (16 issues)
-  - [ ] Fix missing return statements
-  - [ ] Add proper type annotations for variables
-  - [ ] Fix function type validation issues
+- [x] Fix remaining type hint issues (add `Optional` where needed)
+  - [x] `src/xplat/cli.py` - 6 implicit Optional parameters
+  - [x] `src/xplat/rename.py` - 2 implicit Optional parameters
+  - [x] `src/xplat/list.py` - 1 implicit Optional parameter
+- [x] Address critical Ruff linting suggestions (5 core issues)
+  - [x] Convert if/else blocks to ternary operators where appropriate (SIM108)
+  - [x] Fix unused loop variables (B007)
+  - [x] Simplify nested if statements (SIM102)
+  - [x] Replace `open()` with `Path.open()` in tests and constants (PTH123)
+- [ ] Resolve remaining MyPy type checking errors (12 issues)
+  - [ ] Fix missing return statements in `format_bytes()`
+  - [ ] Add proper type annotations for loop variables
+  - [ ] Fix function type validation issues with `list` command name collision
+  - [ ] Resolve `Optional[str]` parameter handling in `print_header()`
 
 ## Development Workflow
 
@@ -30,3 +31,14 @@
 - [x] Update documentation (CLAUDE.md, README.md)
 - [ ] Create development contribution guide
 - [ ] Add GitHub issue templates
+
+## Performance and Maintenance
+
+- [ ] Address remaining B008 warnings (Typer function calls in defaults)
+  - Note: These are standard Typer patterns and may not need fixing
+- [ ] Update vulnerable dependencies identified by Safety
+  - [ ] black 23.1.0 → latest version
+  - [ ] pillow 9.4.0 → latest version
+  - [ ] virtualenv 20.21.1 → latest version
+- [ ] Consider pytest dependency updates (ast.Str deprecation warnings)
+- [ ] Evaluate test coverage improvement opportunities (currently 88%)

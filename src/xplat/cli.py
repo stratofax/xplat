@@ -46,10 +46,11 @@ def print_header(ext: str) -> None:
     """
     Print a header for the file list
     """
-    if ext is not None:
-        list_label = f"Listing files with extension '.{ext}':"
-    else:
-        list_label = "Listing all files (no directories):"
+    list_label = (
+        f"Listing files with extension '.{ext}':"
+        if ext is not None
+        else "Listing all files (no directories):"
+    )
 
     label_border = "-" * len(list_label)
     typer.echo(label_border)
@@ -138,7 +139,7 @@ def print_selected_info(files: list, selected: str) -> str:
     return "Select another file to examine.\n"
 
 
-def review_files(directory: Path, extension: str = None) -> None:
+def review_files(directory: Path, extension: Optional[str] = None) -> None:
     """
     Displays a list of files and prompts for file selection
     """
@@ -161,7 +162,7 @@ def review_files(directory: Path, extension: str = None) -> None:
 
 def rename_file_with_output(
     file_name: Path,
-    output_dir: Path = None,
+    output_dir: Optional[Path] = None,
     dry_run: bool = False,
     label: str = "",
 ) -> None:
@@ -179,7 +180,7 @@ def rename_file_with_output(
 
 def rename_list(
     files: list,
-    output_dir: Path = None,
+    output_dir: Optional[Path] = None,
     dryrun: bool = False,
 ) -> int:
     """
@@ -194,8 +195,10 @@ def rename_list(
     else:
         start_label = "Converting file name:"
 
-    for convert_count, current_name in enumerate(files, start=1):
+    for _, current_name in enumerate(files, start=1):
         rename_file_with_output(current_name, output_dir, dryrun, start_label)
+
+    convert_count = len(files)
 
     if dryrun:
         typer.echo("")
@@ -267,7 +270,9 @@ def list(
     path: Optional[Path] = typer.Argument(
         None, help="Directory to list files from (current if none)."
     ),
-    ext: str = typer.Option(None, "--ext", "-x", help="Case-sensitive file extension."),
+    ext: Optional[str] = typer.Option(
+        None, "--ext", "-x", help="Case-sensitive file extension."
+    ),
 ) -> None:
     """
     List files in a directory, or info for a file
@@ -292,13 +297,13 @@ def rename(
         "-s",
         help="Source directory containing the files to rename.",
     ),
-    output_dir: Path = typer.Option(
+    output_dir: Optional[Path] = typer.Option(
         None,
         "--output-dir",
         "-o",
         help="Output directory to save renamed files.",
     ),
-    ext: str = typer.Option(
+    ext: Optional[str] = typer.Option(
         None,
         "--ext",
         "-e",
@@ -329,13 +334,12 @@ def rename(
         raise typer.Exit(1)
 
     # check output dir exists if specified
-    if output_dir is not None:
-        if not output_dir.exists():
-            typer.secho(
-                f"Output directory {output_dir} does not exist.",
-                fg=typer.colors.RED,
-            )
-            raise typer.Exit(1)
+    if output_dir is not None and not output_dir.exists():
+        typer.secho(
+            f"Output directory {output_dir} does not exist.",
+            fg=typer.colors.RED,
+        )
+        raise typer.Exit(1)
 
     # get list of files
     files = []

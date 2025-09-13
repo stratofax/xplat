@@ -84,7 +84,7 @@ def test_list():
     # create a large file (20K) to test file size
     list_file_1 = test_path.joinpath("list_file_1.txt")
     list_file_1.touch(exist_ok=True)
-    with open(list_file_1, "w") as f:
+    with list_file_1.open("w") as f:
         f.write("0123456789" * 2048)
     list_file_2 = test_path.joinpath("list_file_2.txt")
     list_file_2.touch(exist_ok=True)
