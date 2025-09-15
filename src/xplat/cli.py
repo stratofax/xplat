@@ -6,7 +6,7 @@ TODO: add logging, verbosity
 """
 
 from pathlib import Path
-from typing import Optional
+from typing import Annotated, Optional
 
 import typer
 
@@ -242,18 +242,21 @@ def rename_files(
 # CLI interface
 # sourcery skip: avoid-global-variables
 # module level variables are required by typer
-app = typer.Typer(help=constants.APP_HELP, rich_markup_mode=None, pretty_exceptions_enable=False)
+app = typer.Typer(
+    help=constants.APP_HELP,
+    rich_markup_mode=None,
+    pretty_exceptions_enable=False,
+    add_completion=False,
+    context_settings={"help_option_names": ["-h", "--help"]}
+)
 
 
 @app.callback()
 def main(
-    version: Optional[bool] = typer.Option(
-        None,
-        "--version",
-        "-V",
-        callback=version_callback,
-        help="Print the version number.",
-    ),
+    version: Annotated[
+        Optional[bool],
+        typer.Option("--version", "-V", callback=version_callback, help="Print the version number.")
+    ] = None,
 ) -> None:
     """Empty function required for version callback"""
     pass
@@ -267,8 +270,8 @@ def info() -> None:
 
 @app.command()
 def list(
-    path: Optional[Path] = None,
-    ext: Optional[str] = typer.Option(None, "--ext", "-x"),
+    path: Annotated[Optional[Path], typer.Argument(help="Path to file or directory")] = None,
+    ext: Annotated[Optional[str], typer.Option("--ext", "-x", help="File extension filter")] = None,
 ) -> None:
     """
     List files in a directory, or info for a file
@@ -287,11 +290,11 @@ def list(
 
 @app.command()
 def rename(
-    source_dir: Path = typer.Option(..., "--source-dir", "-s"),
-    output_dir: Optional[Path] = typer.Option(None, "--output-dir", "-o"),
-    ext: Optional[str] = typer.Option(None, "--ext", "-e"),
-    dry_run: bool = typer.Option(False, "--dry-run", "-n"),
-    interactive: bool = typer.Option(False, "--interactive", "-i"),
+    source_dir: Annotated[Path, typer.Option("--source-dir", "-s", help="Source directory")],
+    output_dir: Annotated[Optional[Path], typer.Option("--output-dir", "-o", help="Output directory")] = None,
+    ext: Annotated[Optional[str], typer.Option("--ext", "-e", help="File extension filter")] = None,
+    dry_run: Annotated[bool, typer.Option("--dry-run", "-n", help="Preview changes without modifying")] = False,
+    interactive: Annotated[bool, typer.Option("--interactive", "-i", help="Interactive confirmation mode")] = False,
 ) -> None:
     """Convert file names for cross-platform compatibility"""
     # check source dir exists

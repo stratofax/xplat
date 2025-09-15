@@ -30,7 +30,8 @@ def test_app():
     """
     result = _runner.invoke(app)
     assert result.exit_code == constants.MISSING_COMMAND
-    assert "Missing command." in result.stdout
+    # With newer Typer versions, error message appears in stderr
+    assert "Missing command." in result.stderr or "Missing command." in result.stdout
 
 
 def test_version():
