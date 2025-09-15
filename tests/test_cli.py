@@ -258,3 +258,60 @@ def test_print_selected_info(monkeypatch):
     with pytest.raises(Exit):
         result = print_selected_info(files, file_selector)
         assert expected_error in result, "Expected error message not found."
+
+
+# TDD Tests for --help functionality (these should FAIL with current Typer version)
+def test_app_help():
+    """
+    Test that `xplat --help` works without crashing.
+    This test should FAIL with current Typer 0.9.x due to compatibility issues.
+    """
+    result = _runner.invoke(app, ["--help"])
+    assert result.exit_code == constants.NO_ERROR
+    assert "Cross-platform tools for batch file management" in result.stdout
+    assert "Commands:" in result.stdout or "Usage:" in result.stdout
+
+
+def test_info_help():
+    """
+    Test that `xplat info --help` works without crashing.
+    This test should FAIL with current Typer 0.9.x due to compatibility issues.
+    """
+    result = _runner.invoke(app, ["info", "--help"])
+    assert result.exit_code == constants.NO_ERROR
+    assert "info" in result.stdout.lower()
+
+
+def test_list_help():
+    """
+    Test that `xplat list --help` works without crashing.
+    This test should FAIL with current Typer 0.9.x due to compatibility issues.
+    """
+    result = _runner.invoke(app, ["list", "--help"])
+    assert result.exit_code == constants.NO_ERROR
+    assert "list" in result.stdout.lower()
+    assert "--ext" in result.stdout or "extension" in result.stdout.lower()
+
+
+def test_rename_help():
+    """
+    Test that `xplat rename --help` works without crashing.
+    This test should FAIL with current Typer 0.9.x due to compatibility issues.
+    """
+    result = _runner.invoke(app, ["rename", "--help"])
+    assert result.exit_code == constants.NO_ERROR
+    assert "rename" in result.stdout.lower()
+    assert "--source-dir" in result.stdout
+    assert "--output-dir" in result.stdout
+    assert "--dry-run" in result.stdout
+    assert "--interactive" in result.stdout
+
+
+def test_help_flag_short():
+    """
+    Test that `xplat -h` works as a short form of --help.
+    This test should FAIL with current Typer 0.9.x due to compatibility issues.
+    """
+    result = _runner.invoke(app, ["-h"])
+    assert result.exit_code == constants.NO_ERROR
+    assert "Cross-platform tools for batch file management" in result.stdout

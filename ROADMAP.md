@@ -1,11 +1,27 @@
 # Roadmap for xplat
 
+## Critical Typer Compatibility Issues (URGENT)
+
+- [ ] **Fix Typer help system crashes** - `TypeError: Parameter.make_metavar()` compatibility issue
+  - [ ] Upgrade Typer from 0.9.x to latest stable version (0.12+)
+  - [ ] Test all help functionality: `--help`, `-h`, command-specific help
+  - [ ] Resolve Click version compatibility (currently Click 8.2.1)
+  - [ ] Fix 287+ deprecation warnings from Click/Typer version mismatch
+- [ ] **Resolve TDD test failures** - 5/5 help tests currently failing
+  - [ ] `test_app_help()` - Main application help
+  - [ ] `test_info_help()` - Info command help
+  - [ ] `test_list_help()` - List command help
+  - [ ] `test_rename_help()` - Rename command help
+  - [ ] `test_help_flag_short()` - Short flag `-h` support
+
 ## Update dependencies
 
 - [x] Remove Sourcery dependency and replace with ruff
 - [x] Update Python version requirements from 3.9 to 3.12
-- [x] Resolve Safety + Typer compatibility issue (updated Typer to 0.12.x, downgraded Safety to 1.10.3)
+- [x] Remove unused dependencies (optimize-images, pdf2image, shellingham, importlib-resources)
+- [x] Remove redundant dev dependencies (black, flake8, isort, pylint) - replaced by Ruff
 - [x] Fix MyPy pre-commit integration dependency conflicts (using local poetry run mypy)
+- [ ] Resolve remaining Safety + Typer compatibility after Typer upgrade
 
 ## Code Quality Improvements
 
@@ -34,11 +50,19 @@
 
 ## Performance and Maintenance
 
+- [x] **Dependency cleanup completed** - Removed 18 unused dependencies
+  - [x] Eliminated image processing dependencies (optimize-images, pdf2image, pillow)
+  - [x] Streamlined dev tooling (consolidated to Ruff + MyPy + Bandit + Safety)
+  - [x] Reduced security surface area by removing unused packages
 - [ ] Address remaining B008 warnings (Typer function calls in defaults)
-  - Note: These are standard Typer patterns and may not need fixing
-- [ ] Update vulnerable dependencies identified by Safety
-  - [ ] black 23.1.0 → latest version
-  - [ ] pillow 9.4.0 → latest version
-  - [ ] virtualenv 20.21.1 → latest version
+  - Note: These are standard Typer patterns - may resolve with Typer upgrade
+- [ ] Update remaining vulnerable dependencies after Typer upgrade
+  - [x] ~~black 23.1.0~~ - Removed (replaced by Ruff)
+  - [x] ~~pillow 9.4.0~~ - Removed (not used)
+  - [ ] virtualenv 20.21.1 → latest version (dev dependency)
 - [ ] Consider pytest dependency updates (ast.Str deprecation warnings)
 - [ ] Evaluate test coverage improvement opportunities (currently 88%)
+- [ ] **Performance improvements from dependency reduction**
+  - [x] Faster installs with 18 fewer dependencies
+  - [x] Smaller Docker images / deployment footprint
+  - [x] Reduced potential for dependency conflicts

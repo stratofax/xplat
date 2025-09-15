@@ -242,7 +242,7 @@ def rename_files(
 # CLI interface
 # sourcery skip: avoid-global-variables
 # module level variables are required by typer
-app = typer.Typer(help=constants.APP_HELP)
+app = typer.Typer(help=constants.APP_HELP, rich_markup_mode=None, pretty_exceptions_enable=False)
 
 
 @app.callback()
@@ -267,12 +267,8 @@ def info() -> None:
 
 @app.command()
 def list(
-    path: Optional[Path] = typer.Argument(
-        None, help="Directory to list files from (current if none)."
-    ),
-    ext: Optional[str] = typer.Option(
-        None, "--ext", "-x", help="Case-sensitive file extension."
-    ),
+    path: Optional[Path] = None,
+    ext: Optional[str] = typer.Option(None, "--ext", "-x"),
 ) -> None:
     """
     List files in a directory, or info for a file
@@ -291,38 +287,11 @@ def list(
 
 @app.command()
 def rename(
-    source_dir: Path = typer.Option(
-        ...,
-        "--source-dir",
-        "-s",
-        help="Source directory containing the files to rename.",
-    ),
-    output_dir: Optional[Path] = typer.Option(
-        None,
-        "--output-dir",
-        "-o",
-        help="Output directory to save renamed files.",
-    ),
-    ext: Optional[str] = typer.Option(
-        None,
-        "--ext",
-        "-e",
-        help="Case-sensitive file extension.",
-    ),
-    dry_run: bool = typer.Option(
-        False,
-        "--dry-run",
-        "-n",
-        help="Only display (don't save) proposed name changes",
-        show_default=True,
-    ),
-    interactive: bool = typer.Option(
-        False,
-        "--interactive",
-        "-i",
-        help="Prompt for confirmation before renaming",
-        show_default=True,
-    ),
+    source_dir: Path = typer.Option(..., "--source-dir", "-s"),
+    output_dir: Optional[Path] = typer.Option(None, "--output-dir", "-o"),
+    ext: Optional[str] = typer.Option(None, "--ext", "-e"),
+    dry_run: bool = typer.Option(False, "--dry-run", "-n"),
+    interactive: bool = typer.Option(False, "--interactive", "-i"),
 ) -> None:
     """Convert file names for cross-platform compatibility"""
     # check source dir exists
