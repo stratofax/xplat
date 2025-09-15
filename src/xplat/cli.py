@@ -46,11 +46,7 @@ def print_header(ext: str) -> None:
     """
     Print a header for the file list
     """
-    list_label = (
-        f"Listing files with extension '.{ext}':"
-        if ext is not None
-        else "Listing all files (no directories):"
-    )
+    list_label = f"Listing files with extension '.{ext}':" if ext is not None else "Listing all files (no directories):"
 
     label_border = "-" * len(list_label)
     typer.echo(label_border)
@@ -247,7 +243,7 @@ app = typer.Typer(
     rich_markup_mode=None,
     pretty_exceptions_enable=False,
     add_completion=False,
-    context_settings={"help_option_names": ["-h", "--help"]}
+    context_settings={"help_option_names": ["-h", "--help"]},
 )
 
 
@@ -255,7 +251,12 @@ app = typer.Typer(
 def main(
     version: Annotated[
         Optional[bool],
-        typer.Option("--version", "-V", callback=version_callback, help="Print the version number.")
+        typer.Option(
+            "--version",
+            "-V",
+            callback=version_callback,
+            help="Print the version number.",
+        ),
     ] = None,
 ) -> None:
     """Empty function required for version callback"""
