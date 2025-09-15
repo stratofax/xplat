@@ -65,10 +65,14 @@ def make_safe_path(orig_path: Path, target_dir: Optional[Path] = None) -> Path:
     # Create safe filename
     new_name = safe_stem(orig_path.stem) + orig_path.suffix.lower()
     # Return path in target dir if specified, otherwise same dir
-    return target_dir.joinpath(new_name) if target_dir else orig_path.with_name(new_name)
+    return (
+        target_dir.joinpath(new_name) if target_dir else orig_path.with_name(new_name)
+    )
 
 
-def rename_file(orig_path: Path, target_dir: Optional[Path] = None, dry_run: bool = False) -> Path:
+def rename_file(
+    orig_path: Path, target_dir: Optional[Path] = None, dry_run: bool = False
+) -> Path:
     """Rename file to be platform and web-friendly.
 
     Args:

@@ -46,7 +46,11 @@ def print_header(ext: str) -> None:
     """
     Print a header for the file list
     """
-    list_label = f"Listing files with extension '.{ext}':" if ext is not None else "Listing all files (no directories):"
+    list_label = (
+        f"Listing files with extension '.{ext}':"
+        if ext is not None
+        else "Listing all files (no directories):"
+    )
 
     label_border = "-" * len(list_label)
     typer.echo(label_border)
@@ -271,8 +275,12 @@ def info() -> None:
 
 @app.command()
 def list(
-    path: Annotated[Optional[Path], typer.Argument(help="Path to file or directory")] = None,
-    ext: Annotated[Optional[str], typer.Option("--ext", "-x", help="File extension filter")] = None,
+    path: Annotated[
+        Optional[Path], typer.Argument(help="Path to file or directory")
+    ] = None,
+    ext: Annotated[
+        Optional[str], typer.Option("--ext", "-x", help="File extension filter")
+    ] = None,
 ) -> None:
     """
     List files in a directory, or info for a file
@@ -291,11 +299,21 @@ def list(
 
 @app.command()
 def rename(
-    source_dir: Annotated[Path, typer.Option("--source-dir", "-s", help="Source directory")],
-    output_dir: Annotated[Optional[Path], typer.Option("--output-dir", "-o", help="Output directory")] = None,
-    ext: Annotated[Optional[str], typer.Option("--ext", "-e", help="File extension filter")] = None,
-    dry_run: Annotated[bool, typer.Option("--dry-run", "-n", help="Preview changes without modifying")] = False,
-    interactive: Annotated[bool, typer.Option("--interactive", "-i", help="Interactive confirmation mode")] = False,
+    source_dir: Annotated[
+        Path, typer.Option("--source-dir", "-s", help="Source directory")
+    ],
+    output_dir: Annotated[
+        Optional[Path], typer.Option("--output-dir", "-o", help="Output directory")
+    ] = None,
+    ext: Annotated[
+        Optional[str], typer.Option("--ext", "-e", help="File extension filter")
+    ] = None,
+    dry_run: Annotated[
+        bool, typer.Option("--dry-run", "-n", help="Preview changes without modifying")
+    ] = False,
+    interactive: Annotated[
+        bool, typer.Option("--interactive", "-i", help="Interactive confirmation mode")
+    ] = False,
 ) -> None:
     """Convert file names for cross-platform compatibility"""
     # check source dir exists

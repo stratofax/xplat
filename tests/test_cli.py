@@ -101,7 +101,9 @@ def test_list():
     assert list_file_3.name in test_list_dir.stdout
     assert "Total files found = 3" in test_list_dir.stdout
     # list files in test directory with 'txt' extension
-    test_ext = _runner.invoke(app, ["list", str(test_path), "--ext", "txt"], input="q\n")
+    test_ext = _runner.invoke(
+        app, ["list", str(test_path), "--ext", "txt"], input="q\n"
+    )
     assert test_ext.exit_code == 0
     assert list_file_2.name in test_ext.stdout
     assert "Total files found = 3" in test_ext.stdout
@@ -234,7 +236,9 @@ def test_print_selected_info(monkeypatch):
     # Test for invalid input
     file_selector = "invalid"
     result = print_selected_info(files, file_selector)
-    assert result == "Invalid input, please enter a number or 'q'.\n", "Incorrect error message for invalid input."
+    assert (
+        result == "Invalid input, please enter a number or 'q'.\n"
+    ), "Incorrect error message for invalid input."
 
     # Test for out-of-range input
     file_selector = "5"
