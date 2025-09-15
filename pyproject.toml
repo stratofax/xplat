@@ -1,29 +1,21 @@
 [tool.poetry]
 name = "xplat"
 version = "0.1.2"
-description = "Cross-platform tools for file and image conversion"
+description = "Cross-platform tools for batch file management and conversion"
 authors = ["Neil Johnson <neil@cadent.com>"]
 packages = [{ include = "xplat", from = "src" }]
 
 [tool.poetry.dependencies]
 python = "^3.12"
 colorama = "^0.4.4"
-optimize-images = "^1.5.0"
-pdf2image = "^1.16.0"
-typer = "^0.12.0"
-shellingham = "^1.4.0"
-importlib-resources = "^5.12.0"
+typer = "^0.9.0"
 tomli = "^2.0.1"
 
 [tool.poetry.scripts]
 xplat = 'xplat.cli:app'
 
 [tool.poetry.group.dev.dependencies]
-black = "^23.1.0"
-flake8 = "^7.1.1"
-isort = "^5.12.0"
 mypy = "^1.0.1"
-pylint = "^2.16.2"
 ruff = "^0.6.0"
 pre-commit = "^3.8.0"
 bandit = "^1.7.0"
