@@ -22,6 +22,8 @@
 - [x] Remove redundant dev dependencies (black, flake8, isort, pylint) - replaced by Ruff
 - [x] Fix MyPy pre-commit integration dependency conflicts (using local poetry run mypy)
 - [x] Resolve remaining Safety + Typer compatibility after Typer upgrade ✅
+- [ ] Check for additional outdated dependencies
+- [ ] Update old dependencies to modern versions
 
 ## Code Quality Improvements
 
@@ -67,9 +69,36 @@
   - [x] Smaller Docker images / deployment footprint
   - [x] Reduced potential for dependency conflicts
 
+## To Do - CLI
+
+Updates to the CLI interface, by module.
+
+### cli
+
+- [ ] add logging to the CLI
+- [ ] implement plugin architecture
+
+### list
+
+- [ ] Use the current directory if no directory is specified
+
+### info
+
+- [ ] separate data collection from formattting
+- [ ] export to JSON format
+
+### rename
+
+- [ ] Make the source directory the default (no option flag required)
+- [ ] Use the current directory if no source directory is specified (turn on Interactive mode to confirm)
+- [ ] Support conversion of a single file
+- [ ] Keep hyphens ("-") in file names
+- [ ] Remove leading, trailing spaces from file names
+
 ## Recent Achievements (2025-09-14)
 
 ### ✅ Typer Compatibility Resolution
+
 Successfully resolved critical Typer compatibility issues using Test-Driven Development:
 
 **Technical Achievement:**
