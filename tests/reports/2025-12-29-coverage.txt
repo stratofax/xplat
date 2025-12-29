@@ -1,0 +1,53 @@
+Xplat Test Coverage Report
+==========================
+Date: 2025-12-29
+Python: 3.12.12
+Platform: linux
+
+Test Results
+------------
+Total Tests: 17
+Passed: 17
+Failed: 0
+Status: ALL PASSED
+
+Coverage Summary
+----------------
+Total Statements: 273
+Statements Missed: 34
+Overall Coverage: 88%
+
+Coverage by Module
+------------------
+Module                    Stmts   Miss  Cover   Missing Lines
+----------------------------------------------------------------------
+src/xplat/__init__.py         0      0   100%   -
+src/xplat/cli.py            157     24    85%   160, 209, 225-239, 321-325, 329-333, 341-343, 352, 364-365, 371
+src/xplat/constants.py       17      2    88%   11-12
+src/xplat/info.py            30      0   100%   -
+src/xplat/list.py            46      8    83%   30-37, 54
+src/xplat/rename.py          23      0   100%   -
+----------------------------------------------------------------------
+
+Analysis of Uncovered Code
+--------------------------
+cli.py (24 lines uncovered):
+  - Line 160: Error handling path
+  - Line 209: Edge case handling
+  - Lines 225-239: Interactive mode prompts
+  - Lines 321-325, 329-333: Command error handling
+  - Lines 341-343, 352: Exception handling paths
+  - Lines 364-365, 371: Edge case error paths
+
+constants.py (2 lines uncovered):
+  - Lines 11-12: Fallback version handling when pyproject.toml is missing
+
+list.py (8 lines uncovered):
+  - Lines 30-37: choose_files() interactive selection function
+  - Line 54: Edge case in file listing
+
+Modules with 100% Coverage
+--------------------------
+- src/xplat/__init__.py
+- src/xplat/info.py
+- src/xplat/rename.py
