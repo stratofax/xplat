@@ -6,7 +6,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 Xplat is a cross-platform Python CLI tool for batch file management and conversion operations. Built with Python 3.12+ using Poetry for dependency management and Typer for the CLI interface.
 
-**Current Status** (2026-02-19): CI fully green. All mypy, ruff, and bandit checks pass. 17/17 tests, 88% coverage. Builds on Ubuntu, macOS, Windows with Python 3.12 and 3.13.
+**Current Status** (2026-02-19): Version 0.2.0. CI fully green. All mypy, ruff, and bandit checks pass. 21/21 tests, 87% coverage. Builds on Ubuntu, macOS, Windows with Python 3.12 and 3.13.
 
 ## Development Commands
 
@@ -53,9 +53,9 @@ Xplat is a cross-platform Python CLI tool for batch file management and conversi
 5. **Specific Issue Debugging**: Use targeted ruff rules for focused fixes
 
 ### Quality Metrics (2026-02-19)
-- **Tests**: 17/17 passing
-- **Test Coverage**: 88% (271 statements, 33 missed)
-- **MyPy**: 0 errors (all resolved)
+- **Tests**: 21/21 passing
+- **Test Coverage**: 87% (289 statements, 38 missed)
+- **MyPy**: 0 errors
 - **Ruff**: 0 linting or formatting issues
 - **Bandit**: 0 security findings
 - **CI**: Green on all 6 matrix jobs (3 OS x 2 Python versions)
@@ -68,7 +68,7 @@ Xplat is a cross-platform Python CLI tool for batch file management and conversi
   - `list.py` - File discovery, listing utilities, and FileInfo class
   - `rename.py` - Enhanced file renaming with `rename_file()`, `make_safe_path()`, and `safe_stem()` functions
   - `info.py` - Platform information reporting
-- **Configuration** (`constants.py`): Dynamic version reading from pyproject.toml, error codes, program metadata
+- **Configuration** (`constants.py`): Dynamic version via `importlib.metadata`, error codes, program metadata
 - **Development Planning** (`TODO-CLI.md`): Planned improvements and feature roadmap
 
 ### Command Architecture

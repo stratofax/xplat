@@ -98,6 +98,18 @@ def test_rename_file_errors(test_dirs, test_files):
         rename.rename_file(test_file, target_dir)
 
 
+def test_rename_file_rejects_symlink(test_dirs):
+    """Test that rename_file refuses to operate on symlinks."""
+    test_path, _ = test_dirs
+    real_file = test_path / "real_file.txt"
+    real_file.write_text("content")
+    symlink = test_path / "link_to_file.txt"
+    symlink.symlink_to(real_file)
+
+    with pytest.raises(OSError, match="symlink"):
+        rename.rename_file(symlink)
+
+
 def test_rename_file_success(test_dirs, test_files):
     """Test successful file renaming operations."""
     test_path, target_dir = test_dirs

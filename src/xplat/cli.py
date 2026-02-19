@@ -12,7 +12,7 @@ import typer
 
 from xplat import constants
 from xplat.info import create_platform_report
-from xplat.list import FileInfo, check_file, create_file_list
+from xplat.list import FileInfo, check_file, create_file_list, validate_extension
 from xplat.rename import rename_file
 
 # numeric constants
@@ -191,10 +191,15 @@ def rename_list(
     else:
         start_label = "Converting file name:"
 
+    skip_count = 0
     for _, current_name in enumerate(files, start=1):
-        rename_file_with_output(current_name, output_dir, dryrun, start_label)
+        try:
+            rename_file_with_output(current_name, output_dir, dryrun, start_label)
+        except (FileExistsError, OSError) as e:
+            print_error(f"Skipped: {e}")
+            skip_count += 1
 
-    convert_count = len(files)
+    convert_count = len(files) - skip_count
 
     if dryrun:
         typer.echo("")
@@ -313,6 +318,14 @@ def rename(
             fg=typer.colors.RED,
         )
         raise typer.Exit(1)
+
+    # validate extension if specified
+    if ext is not None:
+        try:
+            ext = validate_extension(ext)
+        except ValueError as e:
+            typer.secho(str(e), fg=typer.colors.RED)
+            raise typer.Exit(1) from e
 
     # get list of files
     files = []

@@ -55,12 +55,25 @@ def check_file(file_name: Path) -> tuple:
     return file_exist, error_msg
 
 
+def validate_extension(ext: str) -> str:
+    """Validate and normalize a file extension string.
+
+    Raises:
+        ValueError: If extension contains non-alphanumeric characters.
+    """
+    ext = ext.lstrip(".")
+    if not ext.isalnum():
+        msg = f"Invalid file extension: '{ext}' (must be alphanumeric)"
+        raise ValueError(msg)
+    return ext
+
+
 def create_file_list(dir_path: Path, file_glob: str | None = None) -> list:
     """Create a list of files in a directory, return the sorted list."""
     if file_glob is None:
         return sorted(dir_path.glob("*.*"))
-    file_glob = file_glob.lstrip(".")
-    globber = f"*.{file_glob}"
+    ext = validate_extension(file_glob)
+    globber = f"*.{ext}"
     return sorted(dir_path.glob(globber))
 
 

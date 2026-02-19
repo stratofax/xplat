@@ -13,6 +13,7 @@ from typer.testing import CliRunner
 
 from xplat import constants
 from xplat.cli import app, print_files, print_selected_info, rename_list
+from xplat.list import validate_extension
 
 _runner = CliRunner()
 
@@ -305,10 +306,44 @@ def test_rename_help():
 
 
 def test_help_flag_short():
-    """
-    Test that `xplat -h` works as a short form of --help.
-    This test should FAIL with current Typer 0.9.x due to compatibility issues.
-    """
+    """Test that `xplat -h` works as a short form of --help."""
     result = _runner.invoke(app, ["-h"])
     assert result.exit_code == constants.NO_ERROR
     assert "Cross-platform tools for batch file management" in result.stdout
+
+
+def test_validate_extension():
+    """Test extension validation accepts valid and rejects invalid patterns."""
+    # Valid extensions
+    assert validate_extension("txt") == "txt"
+    assert validate_extension(".pdf") == "pdf"
+    assert validate_extension("JPG") == "JPG"
+    assert validate_extension("mp3") == "mp3"
+
+    # Invalid extensions with glob metacharacters
+    with pytest.raises(ValueError, match="alphanumeric"):
+        validate_extension("**/*")
+    with pytest.raises(ValueError, match="alphanumeric"):
+        validate_extension("*")
+    with pytest.raises(ValueError, match="alphanumeric"):
+        validate_extension("../../etc")
+    with pytest.raises(ValueError, match="alphanumeric"):
+        validate_extension("txt;rm -rf")
+
+
+def test_rename_rejects_invalid_extension():
+    """Test that rename command rejects invalid extension input."""
+    runner = CliRunner()
+    with tempfile.TemporaryDirectory() as temp_dir:
+        result = runner.invoke(
+            app,
+            ["rename", "--source-dir", temp_dir, "--ext", "**/*", "--dry-run"],
+        )
+        assert result.exit_code == 1
+
+
+def test_version_from_metadata():
+    """Test that version is loaded from package metadata."""
+    assert constants.VERSION == "0.2.0"
+    assert isinstance(constants.VERSION, str)
+    assert constants.VERSION != "0.0.0-dev"

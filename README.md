@@ -72,8 +72,8 @@ poetry run pytest && poetry run ruff check . && poetry run mypy . --no-error-sum
 ```
 
 **Current Quality Status** (2026-02-19):
-- Tests: 17/17 passing (100%)
-- Coverage: 88% (271 statements, 33 missed)
+- Tests: 21/21 passing (100%)
+- Coverage: 87% (289 statements, 38 missed)
 - MyPy: 0 errors across 6 source files
 - Ruff: 0 linting or formatting issues
 - Bandit: 0 security findings

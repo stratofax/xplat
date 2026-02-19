@@ -82,8 +82,11 @@ def rename_file(orig_path: Path, target_dir: Path | None = None, dry_run: bool =
         FileNotFoundError: If original path is not a file
         NotADirectoryError: If target directory is specified but invalid
         FileExistsError: If target path already exists (unless dry_run=True)
+        OSError: If original path is a symlink
     """
     # Validate inputs
+    if orig_path.is_symlink():
+        raise OSError(f"Refusing to operate on symlink: {orig_path}")
     if not orig_path.is_file():
         raise FileNotFoundError(f"Not a file: {orig_path}")
     if target_dir and not target_dir.is_dir():
