@@ -347,3 +347,100 @@ def test_version_from_metadata():
     assert constants.VERSION == "0.2.0"
     assert isinstance(constants.VERSION, str)
     assert constants.VERSION != "0.0.0-dev"
+
+
+def test_rename_nonexistent_source_dir():
+    """Test that rename rejects a non-existent source directory."""
+    runner = CliRunner()
+    result = runner.invoke(
+        app,
+        ["rename", "--source-dir", "/nonexistent/path", "--dry-run"],
+    )
+    assert result.exit_code == 1
+    assert "does not exist" in result.stdout
+
+
+def test_rename_nonexistent_output_dir():
+    """Test that rename rejects a non-existent output directory."""
+    runner = CliRunner()
+    with tempfile.TemporaryDirectory() as temp_dir:
+        result = runner.invoke(
+            app,
+            ["rename", "--source-dir", temp_dir, "--output-dir", "/nonexistent/output"],
+        )
+        assert result.exit_code == 1
+        assert "does not exist" in result.stdout
+
+
+def test_rename_dry_run_no_output_dir():
+    """Test dry-run rename without an output directory (in-place preview)."""
+    runner = CliRunner()
+    with tempfile.TemporaryDirectory() as temp_dir:
+        temp_dir = Path(temp_dir)
+        test_file = temp_dir / "My Test File.txt"
+        test_file.write_text("content")
+
+        result = runner.invoke(
+            app,
+            ["rename", "--source-dir", str(temp_dir), "--dry-run"],
+        )
+        assert result.exit_code == 0
+        assert "renamed in place" in result.stdout
+
+
+def test_rename_with_extension_filter():
+    """Test rename filters files by extension."""
+    runner = CliRunner()
+    with tempfile.TemporaryDirectory() as temp_dir:
+        temp_dir = Path(temp_dir)
+        output_dir = temp_dir / "output"
+        output_dir.mkdir()
+
+        # Create files with different extensions
+        (temp_dir / "Keep This.txt").write_text("txt")
+        (temp_dir / "Skip This.pdf").write_text("pdf")
+
+        result = runner.invoke(
+            app,
+            ["rename", "--source-dir", str(temp_dir), "--output-dir", str(output_dir), "--ext", "txt"],
+        )
+        assert result.exit_code == 0
+        assert (output_dir / "keep_this.txt").exists()
+        assert not (output_dir / "skip_this.pdf").exists()
+
+
+def test_rename_collision_skips_gracefully():
+    """Test that rename skips files when target already exists."""
+    runner = CliRunner()
+    with tempfile.TemporaryDirectory() as temp_dir:
+        temp_dir = Path(temp_dir)
+        output_dir = temp_dir / "output"
+        output_dir.mkdir()
+
+        # Create source file and pre-existing target
+        (temp_dir / "Test File.txt").write_text("source")
+        (output_dir / "test_file.txt").write_text("existing")
+
+        result = runner.invoke(
+            app,
+            ["rename", "--source-dir", str(temp_dir), "--output-dir", str(output_dir)],
+        )
+        assert result.exit_code == 0
+        assert "Skipped" in result.stdout
+        # Original target content preserved
+        assert (output_dir / "test_file.txt").read_text() == "existing"
+
+
+def test_rename_interactive_abort_no_output_dir():
+    """Test interactive mode abort when no output directory specified."""
+    runner = CliRunner()
+    with tempfile.TemporaryDirectory() as temp_dir:
+        temp_dir = Path(temp_dir)
+        (temp_dir / "File.txt").write_text("content")
+
+        result = runner.invoke(
+            app,
+            ["rename", "--source-dir", str(temp_dir), "--interactive"],
+            input="n\n",
+        )
+        assert result.exit_code == 1
