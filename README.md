@@ -8,38 +8,98 @@
 
 If you have to work with lots of files on different computing platforms, `xplat` is here to help. Uploading files from your notebook to a web server? Use `xplat rename` to change the file names so they won't break your web browser. Want to know more about your computer or Python installation? Use `xplat info` for a detailed system report.
 
-Created for Python 3.9 or later, this package uses the [pathlib module, Object-oriented filesystem paths](https://docs.python.org/3/library/pathlib.html), introduced in Python 3.4, to work with files on all platforms.
+Created for Python 3.12 or later, this package uses the [pathlib module, Object-oriented filesystem paths](https://docs.python.org/3/library/pathlib.html), introduced in Python 3.4, to work with files on all platforms.
 
 ## xplat Features
 
 Designed from the start to work across platforms, `xplat` includes these features:
 
-* Extensive command-line help.
-* Tested on Mac, Linux, and Windows.
-* Works with individual files or directories.
+- Extensive command-line help.
+- Tested on Mac, Linux, and Windows.
+- Works with individual files or directories.
 
 ## Getting Started
 
 1. Create a fork of this repo on your computer.
-2. Ensure that `poetry` is installed on your computer: `poetry --version`
+2. Install Poetry if you haven't already:
+   - Visit https://python-poetry.org/docs/#installation
+   - Or use: `curl -sSL https://install.python-poetry.org | python3 -`
+   - Verify with: `poetry --version`
 3. In the root directory of this project, run `poetry install` to ensure you have all the required packages
 4. Start the virtual environment: `poetry shell`
 5. Run `xplat --help` for a list of subcommands and options.
 6. (Optional) Run `xplat --install-completion` with the name of your shell (bash, zsh, fish, etc.) to enable tab completion.
 
-## Bugs and Testing
+Note: if you don't want to invoke the poetry virtual environment using `poetry shell`, you can simply prefix your commands with `poetry run`. For example, enter `poetry run xplat --help`.
 
-If the steps described above in the **Getting Started** section worked for you, you'll also be able to run the `pytest` test suite. Simply enter:
+## Development and Testing
+
+### Running Tests
+
+If the steps described above in the **Getting Started** section worked for you, you'll also be able to run the `pytest` test suite:
 
 ```bash
 pytest
 ```
 
-To see a code coverage report, enter:
+To see a code coverage report:
 
 ```bash
 pytest --cov-report term-missing --cov=src/
 ```
+
+### Code Quality
+
+This project uses modern Python tooling for code quality:
+
+```bash
+# Lint and format code (replaces flake8 + isort)
+poetry run ruff check .
+poetry run ruff format .
+
+# Auto-fix many linting issues
+poetry run ruff check . --fix
+
+# Type checking
+poetry run mypy .
+
+# Security scanning
+poetry run bandit -r src/
+poetry run pip-audit
+
+# Comprehensive quality check
+poetry run pytest && poetry run ruff check . && poetry run mypy . --no-error-summary
+```
+
+**Current Quality Status** (2026-02-19):
+- Tests: 21/21 passing (100%)
+- Coverage: 87% (289 statements, 38 missed)
+- MyPy: 0 errors across 6 source files
+- Ruff: 0 linting or formatting issues
+- Bandit: 0 security findings
+- CI: Green on Ubuntu, macOS, Windows (Python 3.12, 3.13)
+
+### Pre-commit Hooks (Recommended)
+
+Set up automated code quality checks before each commit:
+
+```bash
+# Install pre-commit hooks
+poetry run pre-commit install
+
+# Run all checks manually
+poetry run pre-commit run --all-files
+```
+
+Once installed, the hooks will automatically run ruff, mypy, bandit, and other quality checks before each commit.
+
+**Development Workflow**:
+1. Install dependencies: `poetry install`
+2. Set up pre-commit: `poetry run pre-commit install`
+3. Develop with automatic quality checks on commit
+4. Before pushing: `poetry run pytest && poetry run ruff check . && poetry run mypy . --no-error-summary`
+
+### Reporting Issues
 
 If you find an error, please report it by creating an issue on this repo.
 
@@ -56,7 +116,7 @@ Commands:
 
 ### info
 
-Display platform information, from Python's perspective. Useful for troubleshooting and debugging. Sample output from a Mac M1 mini:
+Display platform information, from Python's perspective. Useful for troubleshooting and debugging. Here's the sample output from a Mac M1 mini:
 
 ```bash
 ➤ xplat info
@@ -88,7 +148,7 @@ List files in the specified directory. Especially useful to see which files you'
 
 Also lists file information for individual files. Either provide the path to the file, or select a file from the list.
 
-Here are some examples:
+Some examples:
 
 ```bash
 # list all the files (no directories) in your home directory
@@ -102,20 +162,34 @@ xplat list ~/Downloads/ --ext pdf
 
 Convert names of multiple files for internet compatibility; specifically:
 
-* Replace spaces with underscores ("_").
-* Replace all periods with underscores ("_").
-* Convert all characters to lower case.
+- Replace spaces with underscores ("_")
+- Replace all periods with underscores ("_")
+- Convert all characters to lower case
 
 You can either rename the files in place (in the same directory) or copy them to a different directory when you rename them.
 
-Here are some examples:
+Options:
+
+- `-s, --source-dir`: Source directory containing files to rename (required)
+- `-o, --output-dir`: Output directory to save renamed files
+- `-e, --ext`: Case-sensitive file extension filter
+- `-n, --dry-run`: Preview changes without modifying files
+- `-i, --interactive`: Prompt for confirmation before each rename
+
+Some examples:
 
 ```bash
-# Use the "dry run" option to preview name conversion for all the files in the ~/Downloads directory
-xplat names --source-dir ~/Downloads/ --dry-run
+# Use dry run to preview name conversion for all files in ~/Downloads
+xplat rename --source-dir ~/Downloads --dry-run
 
-# move and rename all the pdf files in ~/Downloads to ~/temp
-xplat names --source-dir ~/Downloads/ --output-dir ~/temp/ --ext pdf
+# Move and rename all PDF files from ~/Downloads to ~/temp
+xplat rename --source-dir ~/Downloads --output-dir ~/temp --ext pdf
+
+# Rename files with interactive confirmation
+xplat rename --source-dir ~/Photos --interactive
+
+# Preview renaming of JPG files only
+xplat rename --source-dir ~/Photos --ext jpg --dry-run
 ```
 
 ## FAQ
@@ -124,37 +198,25 @@ Some questions and answers about the `xplat` utility.
 
 ### Why doesn't xplat do X?
 
-I've added the different features as I've needed them for my web development work. If you'd like to suggest a new feature, simply tweet @stratofax -- just use the `xplat` hashtag, and you can contact me this way if you have any questions or suggestions about this project. Please note that I won't reply to DMs.
-
-New features that have a wide appeal, or work well when processing more than one file, will be considered before obscure features that you can already perform on a single file using an existing tool.
-
-If you really want to see a new feature, fork this repo, create a branch, and start coding! Even better, send me a tweet (@stratofax) with the hashtag `#xplat` and I'll open an issue for your new code.
+I've added the different features as I've needed them for my web development work. If you'd like to suggest a new feature, add an issue on this repo.
 
 ### I can already do this thing using another program on my favorite computer. Why would I want to use xplat?
 
 Because:
 
-* You might want to perform the same types of conversions to a larger group of files, not just one, and xplat is designed to process a directory's worth of files.
-* You'd like to automate your workflow instead of opening a graphics program and making the same changes over and over again by hand.
-* You have to switch from one type of computer to another and the program you used to use for converting files is not available / crazy expensive / no fun to use on the new platform.
-* You want to contribute to open source.
+- You might want to perform the same types of conversions to a larger group of files, not just one, and xplat is designed to process many files at once.
+- You'd like to automate your workflow  using bash scripts.
+- You have to switch from one type of computer to another and the program you used to use for converting files is not available / crazy expensive / no fun to use on the new platform.
+- You want to contribute to open source.
 
 ### I can't code, but I want to help! What can I do?
 
-* If you find a bug, let us know: please report it by tweeting @stratofax with the hastag `#xplatbug`, and we'll open an issue to track the bug, especially if we can reproduce it.
-* You can help improve the documentation, by writing, editing, or creating diagrams.
-* You can help translate the program to a different language.
-
-If you want to learn how to code Python, a great place to start is by writing `pytest` tests. These tests are incredibly helpful for the project, as they will ensure the program doesn't break when we add new features. Writing tests is a great way to learn how the code works.
-
-If you're having trouble writing a test, it may be because the code you're trying to test isn't well written. Contact us and let us know how we can make our code better.
-
-If these options, or any others appeal to you, contact us by tweeting @stratofax with the hashtag `#xplat`.
+- If you find a bug, let us know: please report it by creating an issue on this repo.
+- You can help improve the documentation, by writing, editing, or creating diagrams.
+- You can help translate the program to a different language.
 
 ### Why is xplat so slow?
 
 Because xplat is written as a cross-platform tool, not all of the code has been compiled and optimized for your specific platform. Having said that, if you're using `xplat` to process hundreds, or thousands, of files, let us know how you're using the program and perhaps we'll code up some optimizations or add multi-threaded execution to speed things up for you.
 
 In general, though, `xplat` was designed to run through a set of files without intervention, after you've selected your options and answered a few prompts. You can just let it run in the background or overnight while you do something else.
-
-Note that `xplat` also uses some compiled helper programs, which help speed up code execution. In the future, we may compile sections of xplat to improve performance.

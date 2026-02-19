@@ -1,9 +1,13 @@
 """
+Functions for transforming filenames to be platform and web-friendly.
+Handles conversion of spaces, dots, and case in filenames.
+
 Changes filename to avoid platform, path, URL issues:
 * Spaces to delimiter
 * Dots to underscore
 * All lowercase
 * web and internet friendly
+
 Characters allowed in a URL:
 ABCDEFGHIJKLMNOPQRSTUVWXYZ
 abcdefghijklmnopqrstuvwxyz
@@ -20,57 +24,83 @@ https://www.ietf.org/rfc/rfc1738.txt
 from pathlib import Path
 
 
-def safe_stem(orig_stem: str, delim: str = "_") -> str:
+def safe_stem(name: str, delim: str = "_") -> str:
+    """Transform a filename stem to be platform and web-friendly.
+
+    Args:
+        name: Original filename stem
+        delim: Delimiter to use (default: underscore)
+
+    Returns:
+        Transformed filename stem:
+        - Spaces replaced with delimiter
+        - Dots replaced with underscore
+        - All lowercase
+        - Only alphanumeric and delimiter chars
+        - No double delimiters
     """
-    Change spaces to delimiter (default = _, or -)
-    Change dots to underscore
-    Change all to lowercase
-    Remove all other special characters
-    Replace double delimiters with single
-    """
-    new_stem = orig_stem.replace(" ", delim).lower()
-    new_stem = new_stem.replace(".", "_")
-    # remove all special characters
-    new_stem = "".join([c for c in new_stem if c.isalnum() or c == delim])
-    # replace double delimiters with single
-    return new_stem.replace(delim + delim, delim)
+    # Convert to lowercase and replace spaces
+    new_name = name.replace(" ", delim).lower()
+    # Replace dots with underscore (preserve delim if different)
+    new_name = new_name.replace(".", "_")
+    # Keep only alphanumeric and delimiter chars
+    new_name = "".join(c for c in new_name if c.isalnum() or c == delim)
+    # Remove double delimiters
+    while delim + delim in new_name:
+        new_name = new_name.replace(delim + delim, delim)
+    return new_name
 
 
-def safe_renamer(
-    abs_path: Path,
-    target_dir: Path = None,
-    dry_run: bool = False,
-) -> str:
-    """
-    if file exists,
-    convert
-        filename to lower case,
-        dots to
-        spaces to delimiter (default = _)
-    if target dir exists, move renamed file to it
-    """
-    if not abs_path.is_file():
-        raise FileNotFoundError(f"{abs_path} is not a file.")
-    # may not be needed:
-    if target_dir is not None and not target_dir.is_dir():
-        raise NotADirectoryError(f"{target_dir} is not a directory.")
+def make_safe_path(orig_path: Path, target_dir: Path | None = None) -> Path:
+    """Create a new Path with safe filename in target directory.
 
-    # rename file stem
-    # new_stem = safe_stem(abs_path.stem, delim_chr)
-    new_stem = safe_stem(abs_path.stem)
-    # merge the stem with the lowercase suffix
-    new_suffix = abs_path.suffix.lower()
-    new_filename = f"{new_stem}{new_suffix}"
-    # copy file to target dir if provided
-    if target_dir is not None:
-        new_path = target_dir.joinpath(new_filename)
-    # rename file in existing dir if no target provided
-    else:
-        new_path = abs_path.with_name(new_filename)
+    Args:
+        orig_path: Original file path
+        target_dir: Optional target directory for new path
+
+    Returns:
+        New Path with safe filename in original or target directory
+    """
+    # Create safe filename
+    new_name = safe_stem(orig_path.stem) + orig_path.suffix.lower()
+    # Return path in target dir if specified, otherwise same dir
+    return target_dir.joinpath(new_name) if target_dir else orig_path.with_name(new_name)
+
+
+def rename_file(orig_path: Path, target_dir: Path | None = None, dry_run: bool = False) -> Path:
+    """Rename file to be platform and web-friendly.
+
+    Args:
+        orig_path: Path to original file
+        target_dir: Optional target directory for renamed file
+        dry_run: If True, only return the new path without performing rename
+
+    Returns:
+        Path to renamed file (or would-be path if dry_run=True)
+
+    Raises:
+        FileNotFoundError: If original path is not a file
+        NotADirectoryError: If target directory is specified but invalid
+        FileExistsError: If target path already exists (unless dry_run=True)
+        OSError: If original path is a symlink
+    """
+    # Validate inputs
+    if orig_path.is_symlink():
+        raise OSError(f"Refusing to operate on symlink: {orig_path}")
+    if not orig_path.is_file():
+        raise FileNotFoundError(f"Not a file: {orig_path}")
+    if target_dir and not target_dir.is_dir():
+        raise NotADirectoryError(f"Not a directory: {target_dir}")
+
+    # Get new path
+    new_path = make_safe_path(orig_path, target_dir)
+
+    # Check if target exists (skip if dry_run)
+    if not dry_run and new_path.exists():
+        raise FileExistsError(f"File already exists: {new_path}")
+
+    # Perform rename unless dry_run
     if not dry_run:
-        # check to see if file exists
-        if new_path.exists():
-            return f"{new_filename} already exists, skipped."
-        else:
-            abs_path.rename(new_path)
+        orig_path.rename(new_path)
+
     return new_path
