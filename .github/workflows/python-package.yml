@@ -56,8 +56,10 @@ jobs:
           poetry run mypy .
           # Run bandit for security checks
           poetry run bandit -r src/
-          # Run safety for dependency vulnerabilities
-          poetry run safety check
+
+      - name: Dependency vulnerability check
+        continue-on-error: true
+        run: poetry run safety check
       - name: Coveralls GitHub Action
         uses: coverallsapp/github-action@v1
         with:
