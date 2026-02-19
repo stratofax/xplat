@@ -26,6 +26,6 @@ The full picture for v0.2.0:
 
 We're a small team, and having 32 agents independently stress-test your code before release is the kind of leverage that changes what's possible. Every vulnerability they surfaced was one we could fix before users ever encountered it.
 
-github.com/stratofax/xplat
+github.com/cadentdev/xplat
 
 #OpenSource #Python #AgenticDevelopment #CyberSecurity #RedTeam #AI #DevSecOps

@@ -1,8 +1,8 @@
 # xplat
 
-[![Coverage Status](https://coveralls.io/repos/github/stratofax/xplat/badge.svg?branch=release/candidate-01)](https://coveralls.io/github/stratofax/xplat?branch=release/candidate-01)
+[![Coverage Status](https://coveralls.io/repos/github/cadentdev/xplat/badge.svg?branch=main)](https://coveralls.io/github/cadentdev/xplat?branch=main)
 
-(Coverage stats for the release/candidate-01 branch)
+(Coverage stats for the main branch)
 
 ## Cross-platform Python tools for batch file management and conversion at the command line
 
