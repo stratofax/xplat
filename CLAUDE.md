@@ -27,7 +27,7 @@ Xplat is a cross-platform Python CLI tool for batch file management and conversi
 - `poetry run black .` - Format code with black
 - `poetry run mypy .` - Type checking (0 errors as of 2026-02-19)
 - `poetry run bandit -r src/` - Security linting
-- `poetry run safety scan --output text` - Check dependencies for vulnerabilities
+- `poetry run pip-audit` - Check dependencies for known vulnerabilities
 
 ### Comprehensive Quality Check
 - `poetry run pytest && poetry run ruff check . && poetry run mypy . --no-error-summary` - Full QA pipeline
@@ -89,7 +89,7 @@ The CLI has been refactored with improved patterns:
 - **Ruff**: Fast Python linter and formatter (replaces flake8, isort, black)
 - **MyPy**: Static type checker
 - **Bandit**: Security linter for common vulnerabilities
-- **Safety 3.x**: Dependency vulnerability scanner (`safety scan`)
+- **pip-audit**: Dependency vulnerability scanner (by Python Packaging Authority)
 - **Pre-commit**: Git hook framework for automated quality checks
 
 ### File Processing Patterns
@@ -114,7 +114,7 @@ The CLI has been refactored with improved patterns:
 - **Ruff**: Primary linting and formatting tool (style, imports, naming, complexity)
 - **MyPy**: Static type checking (0 errors)
 - **Bandit**: Security linting for common vulnerabilities
-- **Safety 3.x**: Dependency vulnerability scanning (`safety scan`)
+- **pip-audit**: Dependency vulnerability scanning (PyPA)
 - **Pre-commit hooks**: Automated quality checks before commits
 
 ### Style Guidelines

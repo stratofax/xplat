@@ -65,7 +65,7 @@ poetry run mypy .
 
 # Security scanning
 poetry run bandit -r src/
-poetry run safety scan --output text
+poetry run pip-audit
 
 # Comprehensive quality check
 poetry run pytest && poetry run ruff check . && poetry run mypy . --no-error-summary
