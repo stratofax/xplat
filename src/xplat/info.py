@@ -9,9 +9,7 @@ STD_COLUMN = 14
 WIDE_COLUMN = 28
 
 
-def add_header(
-    label: str, tab_stop: int = WIDE_COLUMN, indent: int = 2, char: str = "-"
-) -> str:
+def add_header(label: str, tab_stop: int = WIDE_COLUMN, indent: int = 2, char: str = "-") -> str:
     """Add a header with suffix text and line decorations"""
     padding = char * (tab_stop - len(label))
     return f"\n{char * indent} {label} Information {padding}\n"

@@ -26,8 +26,8 @@ jobs:
       matrix:
         # specify operating systems
         os: [ubuntu-latest, macos-latest, windows-latest]
-        # specify python versions to test
-        python-version: ["3.9", "3.10", "3.11"]
+        # specify python versions to test (project requires ^3.12)
+        python-version: ["3.12", "3.13"]
         # total tests = oses X python versions
         # example exclusion: don't test python3.8 on Mac
         # exclude:
@@ -35,10 +35,10 @@ jobs:
         #    python-version: '3.8'
     steps:
       # steps indented by YAML extension
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Install poetry
         run: pipx install poetry
-      - uses: actions/setup-python@v4
+      - uses: actions/setup-python@v5
         with:
           #  loop through each version of python specified
           python-version: ${{ matrix.python-version }}
