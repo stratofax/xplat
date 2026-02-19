@@ -101,29 +101,36 @@ Updates to the CLI interface, by module.
 
 ## Recent Achievements (2026-02-19)
 
+### ✅ v0.2.0 Release Prep — Security Hardening & Release Blocker Fix
+
+**Security hardening (red team analysis → 4 fixes):**
+- Fixed `constants.py` release blocker: replaced fragile `Path("pyproject.toml")` with `importlib.metadata.version()` — tool now works from any directory
+- Added `validate_extension()` to reject glob metacharacters in extension filter
+- Added symlink detection in `rename_file()` — refuses to operate on symlinks
+- Batch rename now catches `FileExistsError` gracefully (skip + warn, no crash)
+- Replaced `safety` with `pip-audit` (Python Packaging Authority's actively maintained scanner)
+
+**Quality Metrics:**
+- 21/21 tests passing (4 new: extension validation, symlink rejection, version metadata, invalid ext CLI)
+- 87% code coverage
+- 0 mypy errors, 0 ruff errors, 0 bandit findings
+- CI green on all 6 matrix jobs (3 OS x 2 Python versions)
+
 ### ✅ CI Pipeline Fixed and Green
 
-Resolved all CI failures on release/candidate-01 across all 6 matrix jobs (3 OS x 2 Python):
+Resolved all CI failures on release/candidate-01 across all 6 matrix jobs:
 
 **MyPy Type Checking (11 errors → 0):**
-- Renamed `list()` command to `list_files()` with `@app.command(name="list")` to avoid shadowing Python's builtin `list` type (fixed 8 cascading errors)
+- Renamed `list()` command to `list_files()` with `@app.command(name="list")` to avoid shadowing Python's builtin `list` type
 - Fixed `format_bytes()` missing return statement and float/int type mismatch
-- Fixed `print_header()` to accept `Optional[str]`
-- Simplified `constants.py` by removing dead `tomli` fallback import
+- Fixed `print_header()` to accept `str | None`
+- Removed dead `tomli` fallback import from `constants.py`
 
 **Dependency Modernization:**
 - Removed `tomli` dependency (dead code since Python ^3.12 requirement)
-- Updated `safety` from 1.10.3 → 3.7.0, migrated CI from `safety check` to `safety scan`
 - Updated `pytest` ^7 → ^8, `pytest-cov` ^4 → ^6
 - Updated ruff target-version from py39 → py312
-- Separated `safety scan` into non-blocking CI step (transitive dep vulnerabilities don't block builds)
-- Updated CI actions to v4/v5
-
-**Quality Metrics:**
-- 17/17 tests passing
-- 88% code coverage (constants.py improved to 100%)
-- 0 mypy errors, 0 ruff errors, 0 bandit findings
-- Clean builds on Ubuntu, macOS, Windows with Python 3.12 and 3.13
+- Modernized all `Optional[X]` to `X | None` throughout codebase
 
 ## Previous Achievements (2025-09-14)
 

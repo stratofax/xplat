@@ -21,10 +21,9 @@ Xplat is a cross-platform Python CLI tool for batch file management and conversi
 
 ### Code Quality and Linting
 - `poetry run ruff check .` - Fast linting with ruff (replaces flake8 + isort)
-- `poetry run ruff format .` - Format code with ruff (alternative to black)
+- `poetry run ruff format .` - Format code with ruff
 - `poetry run ruff check . --fix` - Auto-fix linting issues
 - `poetry run ruff check --select RUF013,B007,B008,PTH123,SIM102,SIM108` - Check specific rule categories
-- `poetry run black .` - Format code with black
 - `poetry run mypy .` - Type checking (0 errors as of 2026-02-19)
 - `poetry run bandit -r src/` - Security linting
 - `poetry run pip-audit` - Check dependencies for known vulnerabilities
@@ -69,7 +68,7 @@ Xplat is a cross-platform Python CLI tool for batch file management and conversi
   - `rename.py` - Enhanced file renaming with `rename_file()`, `make_safe_path()`, and `safe_stem()` functions
   - `info.py` - Platform information reporting
 - **Configuration** (`constants.py`): Dynamic version via `importlib.metadata`, error codes, program metadata
-- **Development Planning** (`TODO-CLI.md`): Planned improvements and feature roadmap
+- **Task Tracking** (`TASK.md`): Current work items, completed items, and backlog
 
 ### Command Architecture
 The CLI has been refactored with improved patterns:
@@ -83,7 +82,7 @@ The CLI has been refactored with improved patterns:
 - **Typer**: CLI framework with automatic help generation
 - **pathlib**: Modern path handling (Python 3.4+)
 - **colorama**: Cross-platform colored terminal output
-- **tomllib**: TOML parsing for dynamic version reading (stdlib since Python 3.11)
+- **importlib.metadata**: Package version reading from installed metadata (stdlib)
 
 ### Development Dependencies
 - **Ruff**: Fast Python linter and formatter (replaces flake8, isort, black)
