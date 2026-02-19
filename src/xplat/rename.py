@@ -22,7 +22,6 @@ https://www.ietf.org/rfc/rfc1738.txt
 """
 
 from pathlib import Path
-from typing import Optional
 
 
 def safe_stem(name: str, delim: str = "_") -> str:
@@ -52,7 +51,7 @@ def safe_stem(name: str, delim: str = "_") -> str:
     return new_name
 
 
-def make_safe_path(orig_path: Path, target_dir: Optional[Path] = None) -> Path:
+def make_safe_path(orig_path: Path, target_dir: Path | None = None) -> Path:
     """Create a new Path with safe filename in target directory.
 
     Args:
@@ -68,7 +67,7 @@ def make_safe_path(orig_path: Path, target_dir: Optional[Path] = None) -> Path:
     return target_dir.joinpath(new_name) if target_dir else orig_path.with_name(new_name)
 
 
-def rename_file(orig_path: Path, target_dir: Optional[Path] = None, dry_run: bool = False) -> Path:
+def rename_file(orig_path: Path, target_dir: Path | None = None, dry_run: bool = False) -> Path:
     """Rename file to be platform and web-friendly.
 
     Args:

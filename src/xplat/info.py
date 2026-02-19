@@ -50,7 +50,7 @@ def create_platform_report() -> str:
     # tuple of the named tuple labels
     sys_labels = sys_info._fields
     # zip the two tuples together, title-case the name
-    for label, value in zip(sys_labels, sys_info):
+    for label, value in zip(sys_labels, sys_info, strict=False):
         platform_rpt += add_row(label.title(), value)
 
     # get python executable info

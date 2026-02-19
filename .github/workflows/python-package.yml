@@ -59,7 +59,7 @@ jobs:
 
       - name: Dependency vulnerability check
         continue-on-error: true
-        run: poetry run safety check
+        run: poetry run safety scan --output text
       - name: Coveralls GitHub Action
         uses: coverallsapp/github-action@v1
         with:

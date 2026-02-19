@@ -6,7 +6,7 @@ TODO: add logging, verbosity
 """
 
 from pathlib import Path
-from typing import Annotated, Optional
+from typing import Annotated
 
 import typer
 
@@ -42,7 +42,7 @@ def print_error(msg: str) -> None:
     )
 
 
-def print_header(ext: Optional[str]) -> None:
+def print_header(ext: str | None) -> None:
     """
     Print a header for the file list
     """
@@ -135,7 +135,7 @@ def print_selected_info(files: list, selected: str) -> str:
     return "Select another file to examine.\n"
 
 
-def review_files(directory: Path, extension: Optional[str] = None) -> None:
+def review_files(directory: Path, extension: str | None = None) -> None:
     """
     Displays a list of files and prompts for file selection
     """
@@ -158,7 +158,7 @@ def review_files(directory: Path, extension: Optional[str] = None) -> None:
 
 def rename_file_with_output(
     file_name: Path,
-    output_dir: Optional[Path] = None,
+    output_dir: Path | None = None,
     dry_run: bool = False,
     label: str = "",
 ) -> None:
@@ -176,7 +176,7 @@ def rename_file_with_output(
 
 def rename_list(
     files: list,
-    output_dir: Optional[Path] = None,
+    output_dir: Path | None = None,
     dryrun: bool = False,
 ) -> int:
     """
@@ -250,7 +250,7 @@ app = typer.Typer(
 @app.callback()
 def main(
     version: Annotated[
-        Optional[bool],
+        bool | None,
         typer.Option(
             "--version",
             "-V",
@@ -271,8 +271,8 @@ def info() -> None:
 
 @app.command(name="list")
 def list_files(
-    path: Annotated[Optional[Path], typer.Argument(help="Path to file or directory")] = None,
-    ext: Annotated[Optional[str], typer.Option("--ext", "-x", help="File extension filter")] = None,
+    path: Annotated[Path | None, typer.Argument(help="Path to file or directory")] = None,
+    ext: Annotated[str | None, typer.Option("--ext", "-x", help="File extension filter")] = None,
 ) -> None:
     """
     List files in a directory, or info for a file
@@ -292,8 +292,8 @@ def list_files(
 @app.command()
 def rename(
     source_dir: Annotated[Path, typer.Option("--source-dir", "-s", help="Source directory")],
-    output_dir: Annotated[Optional[Path], typer.Option("--output-dir", "-o", help="Output directory")] = None,
-    ext: Annotated[Optional[str], typer.Option("--ext", "-e", help="File extension filter")] = None,
+    output_dir: Annotated[Path | None, typer.Option("--output-dir", "-o", help="Output directory")] = None,
+    ext: Annotated[str | None, typer.Option("--ext", "-e", help="File extension filter")] = None,
     dry_run: Annotated[bool, typer.Option("--dry-run", "-n", help="Preview changes without modifying")] = False,
     interactive: Annotated[bool, typer.Option("--interactive", "-i", help="Interactive confirmation mode")] = False,
 ) -> None:

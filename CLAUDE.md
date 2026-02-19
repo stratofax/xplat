@@ -6,7 +6,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 Xplat is a cross-platform Python CLI tool for batch file management and conversion operations. Built with Python 3.12+ using Poetry for dependency management and Typer for the CLI interface.
 
-**Current Status**: Modern development stack implemented with comprehensive QA tooling. Core type hint and linting issues resolved.
+**Current Status** (2026-02-19): CI fully green. All mypy, ruff, and bandit checks pass. 17/17 tests, 88% coverage. Builds on Ubuntu, macOS, Windows with Python 3.12 and 3.13.
 
 ## Development Commands
 
@@ -25,10 +25,9 @@ Xplat is a cross-platform Python CLI tool for batch file management and conversi
 - `poetry run ruff check . --fix` - Auto-fix linting issues
 - `poetry run ruff check --select RUF013,B007,B008,PTH123,SIM102,SIM108` - Check specific rule categories
 - `poetry run black .` - Format code with black
-- `poetry run mypy .` - Type checking (may show function name collision warnings)
-- `poetry run mypy . --no-error-summary` - Type checking with cleaner output
+- `poetry run mypy .` - Type checking (0 errors as of 2026-02-19)
 - `poetry run bandit -r src/` - Security linting
-- `poetry run safety check` - Check dependencies for vulnerabilities
+- `poetry run safety scan --output text` - Check dependencies for vulnerabilities
 
 ### Comprehensive Quality Check
 - `poetry run pytest && poetry run ruff check . && poetry run mypy . --no-error-summary` - Full QA pipeline
@@ -53,11 +52,13 @@ Xplat is a cross-platform Python CLI tool for batch file management and conversi
 4. **Before Push**: `poetry run pytest && poetry run ruff check . && poetry run mypy . --no-error-summary`
 5. **Specific Issue Debugging**: Use targeted ruff rules for focused fixes
 
-### Quality Metrics (Current Status)
-- **Test Coverage**: 88% (273/307 statements)
-- **Ruff Issues**: Significantly reduced (core issues resolved)
-- **MyPy Errors**: ~12 remaining (mostly function name collisions and missing annotations)
-- **Security**: Clean (Bandit reports 0 issues)
+### Quality Metrics (2026-02-19)
+- **Tests**: 17/17 passing
+- **Test Coverage**: 88% (271 statements, 33 missed)
+- **MyPy**: 0 errors (all resolved)
+- **Ruff**: 0 linting or formatting issues
+- **Bandit**: 0 security findings
+- **CI**: Green on all 6 matrix jobs (3 OS x 2 Python versions)
 
 ## Architecture
 
@@ -82,14 +83,13 @@ The CLI has been refactored with improved patterns:
 - **Typer**: CLI framework with automatic help generation
 - **pathlib**: Modern path handling (Python 3.4+)
 - **colorama**: Cross-platform colored terminal output
-- **tomli/tomllib**: TOML parsing for dynamic version reading
+- **tomllib**: TOML parsing for dynamic version reading (stdlib since Python 3.11)
 
 ### Development Dependencies
-- **Ruff**: Fast Python linter (replaces flake8, isort, and more)
-- **Black**: Code formatter for consistent styling
-- **MyPy**: Static type checker with strict mode
+- **Ruff**: Fast Python linter and formatter (replaces flake8, isort, black)
+- **MyPy**: Static type checker
 - **Bandit**: Security linter for common vulnerabilities
-- **Safety**: Dependency vulnerability scanner
+- **Safety 3.x**: Dependency vulnerability scanner (`safety scan`)
 - **Pre-commit**: Git hook framework for automated quality checks
 
 ### File Processing Patterns
@@ -111,11 +111,10 @@ The CLI has been refactored with improved patterns:
   - `-i/--interactive`: Interactive confirmation mode
 
 ## Code Style and Quality
-- **Ruff**: Primary linting tool covering style, imports, naming conventions, and complexity
-- **Black**: Code formatting for consistent style
-- **MyPy**: Static type checking with strict mode
+- **Ruff**: Primary linting and formatting tool (style, imports, naming, complexity)
+- **MyPy**: Static type checking (0 errors)
 - **Bandit**: Security linting for common vulnerabilities
-- **Safety**: Dependency vulnerability scanning
+- **Safety 3.x**: Dependency vulnerability scanning (`safety scan`)
 - **Pre-commit hooks**: Automated quality checks before commits
 
 ### Style Guidelines

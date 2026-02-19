@@ -3,16 +3,15 @@
 from dataclasses import dataclass
 from datetime import datetime
 from pathlib import Path
-from typing import Optional
 
 
 def format_bytes(num_bytes: float) -> str:
     """format a number of bytes into a human-readable string"""
-    for unit in ["B", "K", "MB", "GB", "TB"]:
+    for unit in ["B", "K", "MB", "GB", "TB", "PB", "EB", "ZB"]:
         if num_bytes < 1024.0:
             return f"{num_bytes:,.1f} {unit}"
         num_bytes /= 1024.0
-    return f"{num_bytes:,.1f} PB"
+    return f"{num_bytes:,.1f} YB"
 
 
 def format_timestamp(timestamp: float) -> str:
@@ -56,7 +55,7 @@ def check_file(file_name: Path) -> tuple:
     return file_exist, error_msg
 
 
-def create_file_list(dir_path: Path, file_glob: Optional[str] = None) -> list:
+def create_file_list(dir_path: Path, file_glob: str | None = None) -> list:
     """Create a list of files in a directory, return the sorted list."""
     if file_glob is None:
         return sorted(dir_path.glob("*.*"))
@@ -70,10 +69,10 @@ class FileInfo:
     """Class to hold file information"""
 
     file_name: Path
-    size: Optional[str] = None
-    created: Optional[str] = None
-    modified: Optional[str] = None
-    accessed: Optional[str] = None
+    size: str | None = None
+    created: str | None = None
+    modified: str | None = None
+    accessed: str | None = None
 
     def __post_init__(self) -> None:
         self.size = format_bytes(self.file_name.stat().st_size)

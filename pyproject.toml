@@ -9,7 +9,6 @@ packages = [{ include = "xplat", from = "src" }]
 python = "^3.12"
 colorama = "^0.4.4"
 typer = "^0.17.4"
-tomli = "^2.0.1"
 
 [tool.poetry.scripts]
 xplat = 'xplat.cli:app'
@@ -19,18 +18,18 @@ mypy = "^1.0.1"
 ruff = "^0.6.0"
 pre-commit = "^3.8.0"
 bandit = "^1.7.0"
-safety = "^1.10.3"
+safety = "^3.0.0"
 
 [tool.poetry.group.test.dependencies]
-pytest = "^7.2.1"
-pytest-cov = "^4.0.0"
+pytest = "^8.0.0"
+pytest-cov = "^6.0.0"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
 build-backend = "poetry.core.masonry.api"
 
 [tool.ruff]
-target-version = "py39"
+target-version = "py312"
 line-length = 127
 
 [tool.ruff.lint]

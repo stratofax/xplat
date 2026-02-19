@@ -4,13 +4,8 @@ Uses errno values: https://docs.python.org/3/library/errno.html
 """
 
 import errno
+import tomllib
 from pathlib import Path
-
-try:
-    import tomllib
-except ModuleNotFoundError:
-    import tomli as tomllib  # type: ignore[no-redef, import-not-found]
-
 
 # read pyproject.toml and store the version number
 with Path("pyproject.toml").open(mode="rb") as pyproject:
