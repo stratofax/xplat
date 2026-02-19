@@ -42,7 +42,7 @@ def print_error(msg: str) -> None:
     )
 
 
-def print_header(ext: str) -> None:
+def print_header(ext: Optional[str]) -> None:
     """
     Print a header for the file list
     """
@@ -269,8 +269,8 @@ def info() -> None:
     typer.echo(create_platform_report())
 
 
-@app.command()
-def list(
+@app.command(name="list")
+def list_files(
     path: Annotated[Optional[Path], typer.Argument(help="Path to file or directory")] = None,
     ext: Annotated[Optional[str], typer.Option("--ext", "-x", help="File extension filter")] = None,
 ) -> None:

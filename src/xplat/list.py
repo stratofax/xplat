@@ -6,12 +6,13 @@ from pathlib import Path
 from typing import Optional
 
 
-def format_bytes(num_bytes: int) -> str:
+def format_bytes(num_bytes: float) -> str:
     """format a number of bytes into a human-readable string"""
     for unit in ["B", "K", "MB", "GB", "TB"]:
         if num_bytes < 1024.0:
             return f"{num_bytes:,.1f} {unit}"
         num_bytes /= 1024.0
+    return f"{num_bytes:,.1f} PB"
 
 
 def format_timestamp(timestamp: float) -> str:
